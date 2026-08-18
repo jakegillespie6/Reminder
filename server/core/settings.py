@@ -9,12 +9,17 @@ load_dotenv(BASE_DIR / '.env')  # load server/.env explicitly
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c3govzzp!eqlwbo@-l5^#4@i38pg*#q$8x)e4x3^-s$&k$ns=v'
+SECRET_KEY = 'django-secure-c3govzzp!eqlwbo@-l5^#4@i38pg*#q$8x)e4x3^-s$&k$ns=v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "py-reminders.app",
+    "www.py-reminders.app",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -109,10 +114,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 AUTH_USER_MODEL = 'accounts.Account'
 
@@ -148,6 +151,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://py-reminders.app'
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
