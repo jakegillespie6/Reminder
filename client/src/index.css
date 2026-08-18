@@ -1,0 +1,117 @@
+@config "../tailwind.config.ts";
+@import "tailwindcss";
+
+/* light (default) */
+:root,
+[data-theme="light"] {
+  /* Background hierarchy */
+  --color-background-primary: 248 250 252;   /* slate-50 */
+  --color-background-secondary: 241 245 249; /* slate-100 */
+  --color-background-tertiary: 226 232 240;  /* slate-200 */
+
+  /* Surfaces */
+  --color-surface: 255 255 255;              /* white */
+  --color-surface-elevated: 241 245 249;     /* slate-100 */
+
+  /* Text hierarchy */
+  --color-text-primary: 17 24 39;            /* gray-900 */
+  --color-text-secondary: 71 85 105;         /* gray-600 */
+  --color-text-tertiary: 107 114 128;        /* gray-500 */
+  --color-text-accent: 5 150 105;            /* emerald-600 */
+
+  /* Accent */
+  --color-accent: 16 185 129;                /* emerald-500 */
+  --color-accent-hover: 5 150 105;           /* emerald-600 */
+  --color-accent-foreground: 255 255 255;    /* white */
+
+  /* Borders */
+  --color-border: 226 232 240;               /* slate-200 */
+  --color-border-strong: 148 163 184;        /* slate-400 */
+
+  /* Status */
+  --color-success: 22 163 74;                /* green-600 */
+  --color-warning: 217 119 6;                /* amber-600 */
+  --color-danger: 220 38 38;                 /* red-600 */
+  --color-info: 37 99 235;                   /* blue-600 */
+}
+
+
+/* dark */
+[data-theme="dark"] {
+  /* Background hierarchy */
+  --color-background-primary: 2 6 23;        /* slate-950 */
+  --color-background-secondary: 15 23 42;    /* slate-900 */
+  --color-background-tertiary: 30 41 59;     /* slate-800 */
+
+  /* Surfaces */
+  --color-surface: 20 30 48;                 /* between slate-900 / slate-800 */
+  --color-surface-elevated: 30 41 59;        /* slate-800 */
+
+  /* Text hierarchy */
+  --color-text-primary: 241 245 249;          /* slate-100 */
+  --color-text-secondary: 203 213 225;        /* slate-300 */
+  --color-text-tertiary: 148 163 184;         /* slate-400 */
+  --color-text-accent: 52 211 153;            /* emerald-400 */
+
+  /* Accent */
+  --color-accent: 16 185 129;                 /* emerald-500 */
+  --color-accent-hover: 52 211 153;           /* emerald-400 */
+  --color-accent-foreground: 2 6 23;          /* slate-950 */
+
+  /* Borders */
+  --color-border: 51 65 85;                   /* slate-700 */
+  --color-border-strong: 71 85 105;           /* slate-600 */
+
+  /* Status */
+  --color-success: 52 211 153;                /* emerald-400 */
+  --color-warning: 251 191 36;                /* amber-400 */
+  --color-danger: 248 113 113;                /* red-400 */
+  --color-info: 56 189 248;                   /* sky-400 */
+}
+
+
+/* abyssal */
+[data-theme="abyssal"] {
+  /* Background hierarchy */
+  --color-background-primary: 13 17 31;       /* #0D111F - deep blue-black */
+  --color-background-secondary: 22 27 46;   /* #161B2E - deep navy */
+  --color-background-tertiary: 32 38 61;      /* #20263D - blue-slate */
+
+  /* Surfaces */
+  --color-surface: 27 32 52;                  /* #1B2034 - card / panel */
+  --color-surface-elevated: 42 48 73;         /* #2A3049 - hover / raised */
+
+  /* Text hierarchy */
+  --color-text-primary: 248 248 242;           /* #F8F8F2 - Dracula foreground */
+  --color-text-secondary: 190 194 211;         /* soft cool gray */
+  --color-text-tertiary: 98 114 164;           /* #6272A4 - Dracula comment */
+  --color-text-accent: 180 52 162;            /* #D600C1 */
+
+  /* Accent */
+  --color-accent: 160 52 142;                 /* #A82A98 - muted magenta */
+  --color-accent-hover: 190 48 173;           /* #BE30AD - brighter hover */
+  --color-accent-foreground: 255 255 255;
+  /* Accent text */
+
+
+  /* Borders */
+  --color-border: 48 55 82;                    /* subtle blue-slate */
+  --color-border-strong: 98 114 164;           /* #6272A4 */
+
+  /* Status */
+  --color-success: 80 250 123;                 /* #50FA7B - Dracula green */
+  --color-warning: 255 184 108;                /* #FFB86C - Dracula orange */
+  --color-danger: 255 85 85;                   /* #FF5555 - Dracula red */
+  --color-info: 139 233 253;                   /* #8BE9FD - Dracula cyan */
+}
+
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: rgb(var(--color-background-primary));
+  color: rgb(var(--color-text-primary));
+}
