@@ -160,5 +160,5 @@ CORS_ALLOW_HEADERS = [
     "content-type",
     "origin",
 ]
-
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 FRONTEND_URL = os.environ.get('FRONTEND_URL')
