@@ -58,7 +58,6 @@ export default function Modal({
 
       target.focus();
 
-      // Optional: select existing text if it's an input/textarea
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
         target.select();
       }
@@ -74,8 +73,11 @@ export default function Modal({
       {isOpen && (
         <LayerContext.Provider value={zIndex}>
           <motion.div
-            className="fixed inset-0 flex items-end sm:items-center justify-center bg-black/40 p-2 sm:p-4"
-            style={{ zIndex }}
+            className="fixed inset-0 flex items-start justify-center bg-black/40 p-2 sm:p-4"
+            style={{
+              zIndex,
+              paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+            }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -86,7 +88,7 @@ export default function Modal({
               role="dialog"
               aria-modal="true"
               aria-label={title}
-              className={`w-full ${maxWidthClassName} rounded-md border border-border bg-background-secondary p-4 shadow-xl max-h-[calc(100dvh-0.5rem)] sm:max-h-[calc(100dvh-2rem)] overflow-y-auto mb-[env(safe-area-inset-bottom)]`}
+              className={`w-full ${maxWidthClassName} rounded-md border border-border bg-background-secondary p-4 shadow-xl max-h-[calc(100dvh-1rem)] overflow-y-auto`}
               initial={{ opacity: 0, y: 80 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -80 }}
