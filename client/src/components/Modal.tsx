@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { LayerContext } from "./LayerContext";
@@ -12,6 +12,7 @@ type ModalProps = {
   maxWidthClassName?: string;
   closeOnBackdropClick?: boolean;
   zIndex?: number;
+  initialFocusSelector?: string;
 };
 
 export default function Modal({
@@ -23,7 +24,10 @@ export default function Modal({
   maxWidthClassName = "max-w-lg",
   closeOnBackdropClick = true,
   zIndex = 6000,
+  initialFocusSelector,
 }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -42,6 +46,27 @@ export default function Modal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen || !initialFocusSelector) return;
+
+    const timer = window.setTimeout(() => {
+      const root = panelRef.current;
+      if (!root) return;
+
+      const target = root.querySelector<HTMLElement>(initialFocusSelector);
+      if (!target) return;
+
+      target.focus();
+
+      // Optional: select existing text if it's an input/textarea
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+        target.select();
+      }
+    }, 30);
+
+    return () => window.clearTimeout(timer);
+  }, [isOpen, initialFocusSelector]);
+
   if (typeof document === "undefined") return null;
 
   return createPortal(
@@ -57,6 +82,7 @@ export default function Modal({
             onClick={closeOnBackdropClick ? onClose : undefined}
           >
             <motion.div
+              ref={panelRef}
               role="dialog"
               aria-modal="true"
               aria-label={title}

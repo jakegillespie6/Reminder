@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import Button from "@components/Button";
 import Modal from "@components/Modal";
@@ -30,20 +30,6 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
     value: type,
     label: type === "general" ? "General" : type,
   }));
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // Wait one tick so the modal/input is mounted before focusing.
-    const timer = window.setTimeout(() => {
-      const el = document.getElementById("new-item-name") as HTMLInputElement | null;
-      if (!el) return;
-      el.focus();
-      el.select();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [isOpen]);
 
   const resetCreateForm = () => {
     setNewItemName("");
@@ -82,6 +68,7 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
       isOpen={isOpen}
       onClose={handleClose}
       title="Create item"
+      initialFocusSelector="input, textarea"
       footer={
         <>
           <Button label="Cancel" variant="secondary" onClick={handleClose} />
