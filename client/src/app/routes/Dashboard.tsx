@@ -22,6 +22,35 @@ export default function Dashboard() {
   const [refetchEpoch, setRefetchEpoch] = useState(0);
   const hasBootstrappedRef = useRef(false);
 
+  // Hide cursor after 5s without mouse movement (Dashboard only).
+  const [isCursorHidden, setIsCursorHidden] = useState(false);
+  const hideCursorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const resetHideTimer = () => {
+      setIsCursorHidden(false);
+
+      if (hideCursorTimerRef.current) {
+        clearTimeout(hideCursorTimerRef.current);
+      }
+
+      hideCursorTimerRef.current = setTimeout(() => {
+        setIsCursorHidden(true);
+      }, 5000);
+    };
+
+    const onMouseMove = () => resetHideTimer();
+
+    // Start timer immediately when page is mounted.
+    resetHideTimer();
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      if (hideCursorTimerRef.current) clearTimeout(hideCursorTimerRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     let disposed = false;
 
@@ -74,7 +103,11 @@ export default function Dashboard() {
   }, [filters]);
 
   return (
-    <div className="box-border min-h-full overflow-x-hidden bg-background-primary p-6 text-text-primary">
+    <div
+      className={`box-border min-h-full overflow-x-hidden bg-background-primary p-6 text-text-primary ${
+        isCursorHidden ? "cursor-none" : ""
+      }`}
+    >
       <div className="mx-auto max-w-4xl space-y-6">
         <SortAndFilterList filters={filters} />
 
