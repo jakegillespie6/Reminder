@@ -190,7 +190,7 @@ export default function PopoverMenu({
                 visibility: isPositioned ? "visible" : "hidden",
                 transformOrigin,
               }}
-              className="fixed z-[4900] min-w-44 rounded-md border border-border bg-surface p-1 shadow-lg"
+              className="fixed z-[4900] min-w-52 sm:min-w-44 rounded-md border border-border bg-surface p-1.5 sm:p-1 shadow-lg"
             >
               {items.map((item) => (
                 <button
@@ -203,7 +203,7 @@ export default function PopoverMenu({
                     item.onClick();
                     setOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors
+                  className={`flex w-full min-h-11 items-center gap-2 rounded-md px-4 py-2.5 sm:px-3 sm:py-2 text-left text-base sm:text-sm transition-colors
                     ${
                       item.danger
                         ? "text-red-400 hover:bg-red-500/10"

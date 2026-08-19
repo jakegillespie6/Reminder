@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useAppSelector } from "@store/hooks";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
@@ -8,17 +7,10 @@ import {
   selectItemsLoading,
 } from "../store";
 import ItemPill from "./ItemPill";
-import { FiArrowUp, FiArrowDown } from "react-icons/fi";
 import type { Item } from "../types";
+
 const PLACEHOLDER_COUNT = 8;
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-type DragStateDetail = {
-  dragging: boolean;
-  x: number;
-  y: number;
-  intent: "purchase" | "delete" | null;
-};
 
 type Props = {
   refetchEpoch?: number;
@@ -30,16 +22,6 @@ const skeletonContainerVariants: Variants = {
     transition: {
       staggerChildren: 0.1,
       delayChildren: 0.03,
-    },
-  },
-};
-
-const listContainerVariants: Variants = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.03, // domino/waterfall timing
-      delayChildren: 0,
     },
   },
 };
@@ -66,8 +48,8 @@ const itemVariants: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      delay: index * 0.045, // was 0.03
-      duration: 0.3,        // was 0.24
+      delay: index * 0.045,
+      duration: 0.3,
       ease: EASE_OUT,
     },
   }),
@@ -85,11 +67,6 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
   const items = useAppSelector(selectAllItems);
   const loading = useAppSelector(selectItemsLoading);
   const error = useAppSelector(selectItemsError);
-
-  const [dragUI, setDragUI] = useState<{
-    active: boolean;
-    over: "purchase" | "delete" | null;
-  }>({ active: false, over: null });
 
   const [highlightedIds, setHighlightedIds] = useState<ItemId[]>([]);
   const prevItemSignatureRef = useRef<Map<ItemId, string>>(new Map());
@@ -145,78 +122,12 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
 
   useEffect(() => {
     return () => {
-      Object.values(highlightTimeoutsRef.current).forEach((t) => window.clearTimeout(t));
+      for (const t of highlightTimeoutsRef.current.values()) {
+        window.clearTimeout(t);
+      }
       highlightTimeoutsRef.current.clear();
     };
   }, []);
-
-  useEffect(() => {
-    const onDragState = (event: Event) => {
-      const detail = (event as CustomEvent<DragStateDetail>).detail;
-
-      if (!detail?.dragging) {
-        setDragUI({ active: false, over: null });
-        return;
-      }
-
-      setDragUI({
-        active: true,
-        over: detail.intent,
-      });
-    };
-
-    window.addEventListener("item-pill-drag-state", onDragState as EventListener);
-    return () => {
-      window.removeEventListener("item-pill-drag-state", onDragState as EventListener);
-    };
-  }, []);
-
-  const dragZones = (
-    <>
-      <div
-        id="purchase-drop-zone"
-        className={`
-          fixed left-0 right-0 z-[3000]
-          top-[var(--app-nav-height,56px)]
-          h-[calc((100dvh-var(--app-nav-height,56px))/3)]
-          transition-opacity duration-150
-          pointer-events-none
-          ${dragUI.active ? "opacity-100" : "opacity-0"}
-          ${
-            dragUI.over === "purchase"
-              ? "bg-gradient-to-b from-emerald-500/55 via-emerald-500/30 to-emerald-500/10"
-              : "bg-gradient-to-b from-emerald-500/35 via-emerald-500/20 to-emerald-500/5"
-          }
-        `}
-      >
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-emerald-950">
-          <FiArrowUp className="h-14 w-14 text-text-secondary" aria-hidden="true" />
-          <span className="text-text-primary font-semibold">Purchase (swipe up)</span>
-        </div>
-      </div>
-
-      <div
-        id="delete-drop-zone"
-        className={`
-          fixed inset-x-0 bottom-0 z-[3000]
-          h-[calc(33.333dvh+env(safe-area-inset-bottom))]
-          transition-opacity duration-150
-          pointer-events-none
-          ${dragUI.active ? "opacity-100" : "opacity-0"}
-          ${
-            dragUI.over === "delete"
-              ? "bg-gradient-to-t from-red-500/55 via-red-500/30 to-red-500/10"
-              : "bg-gradient-to-t from-red-500/35 via-red-500/20 to-red-500/5"
-          }
-        `}
-      >
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 pb-[env(safe-area-inset-bottom)] text-red-950">
-          <FiArrowDown className="h-14 w-14 text-text-secondary" aria-hidden="true" />
-          <span className="text-text-primary font-semibold">Delete (swipe down)</span>
-        </div>
-      </div>
-    </>
-  );
 
   if (error) return <p className="text-sm text-danger">{error}</p>;
 
@@ -243,38 +154,34 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
   if (!items.length) return <p className="text-sm text-text-tertiary">No items yet.</p>;
 
   return (
-    <>
-      {typeof document !== "undefined" ? createPortal(dragZones, document.body) : dragZones}
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`items-refetch-${refetchEpoch}`}
-          variants={listSwapVariants}
-          initial="hidden"
-          animate="show"
-          exit="exit"
-          className="flex flex-wrap gap-2"
-        >
-          <motion.div className="flex flex-wrap gap-2">
-            <AnimatePresence>
-              {items.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  custom={index}
-                  initial="hidden"
-                  animate="show"
-                  layout
-                  variants={itemVariants}
-                  exit="exit"
-                  transition={{ layout: { duration: 0.22, ease: EASE_OUT } }}
-                >
-                  <ItemPill item={item} highlight={highlightedIds.includes(item.id)} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={`items-refetch-${refetchEpoch}`}
+        variants={listSwapVariants}
+        initial="hidden"
+        animate="show"
+        exit="exit"
+        className="flex flex-wrap gap-2"
+      >
+        <motion.div className="flex flex-wrap gap-2">
+          <AnimatePresence>
+            {items.map((item, index) => (
+              <motion.div
+                key={item.id}
+                custom={index}
+                initial="hidden"
+                animate="show"
+                layout
+                variants={itemVariants}
+                exit="exit"
+                transition={{ layout: { duration: 0.22, ease: EASE_OUT } }}
+              >
+                <ItemPill item={item} highlight={highlightedIds.includes(item.id)} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
-      </AnimatePresence>
-    </>
+      </motion.div>
+    </AnimatePresence>
   );
 }
