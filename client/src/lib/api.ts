@@ -11,7 +11,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token");
   const url = config.url ?? "";
-  const isRefreshRoute = /\/auth\/refresh-token\/?$/.test(url);
+  const isRefreshRoute = /\/auth\/base\/refresh-token\/?$/.test(url);
 
   if (token && !isRefreshRoute) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -26,7 +26,7 @@ api.interceptors.response.use(
     const originalRequest = error.config as any;
     const status = error?.response?.status;
     const url = originalRequest?.url ?? "";
-    const isRefreshRoute = /\/auth\/refresh-token\/?$/.test(url);
+    const isRefreshRoute = /\/auth\/base\/refresh-token\/?$/.test(url);
 
     if (status === 401 && !originalRequest?._retry && !isRefreshRoute) {
       originalRequest._retry = true;
@@ -35,9 +35,9 @@ api.interceptors.response.use(
         const refresh = localStorage.getItem("refresh_token");
         if (!refresh) throw new Error("No refresh token");
 
-        const refreshResponse = await api.post("/auth/refresh-token/", { refresh });
+        const refreshResponse = await api.post("/auth/base/refresh-token/", { refresh });
         const newAccess = refreshResponse?.data?.access;
-        if (!newAccess) throw new Error("No access token returned");
+        if (!newAccess) throw new Error("No access token in refresh response");
 
         localStorage.setItem("access_token", newAccess);
         originalRequest.headers = originalRequest.headers ?? {};
@@ -47,6 +47,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        localStorage.removeItem("account");
         return Promise.reject(refreshError);
       }
     }

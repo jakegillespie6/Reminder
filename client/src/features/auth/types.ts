@@ -28,3 +28,33 @@ export type SignUpResponse = {
   tokens: TokenPair;
   account: Account;
 }
+
+export type DeviceStartResponse = {
+  session_id: string;
+  poll_token: string;
+  verification_uri: string;
+  expires_at: string;
+};
+
+export type DeviceApproveRequest = {
+  session_id: string;
+};
+
+export type DevicePollRequest = {
+  session_id: string;
+  poll_token: string;
+};
+
+export type DevicePollPendingResponse = {
+  status: "pending";
+};
+
+export type DevicePollApprovedResponse = {
+  status: "approved";
+  tokens: TokenPair;
+  account: Account;
+};
+
+export type DevicePollResponse =
+  | DevicePollPendingResponse
+  | DevicePollApprovedResponse;

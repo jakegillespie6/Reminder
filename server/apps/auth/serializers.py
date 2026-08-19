@@ -15,3 +15,10 @@ class TokenPairSerializer(serializers.Serializer):
 class AuthResponseSerializer(serializers.Serializer):
     tokens = TokenPairSerializer()
     account = AccountSerializer()
+
+class DeviceApproveRequestSerializer(serializers.Serializer):
+    session_id = serializers.UUIDField()
+
+class DevicePollRequestSerializer(serializers.Serializer):
+    session_id = serializers.UUIDField()
+    poll_token = serializers.UUIDField()
