@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Button from "@components/Button";
 import Modal from "@components/Modal";
@@ -30,6 +30,20 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
     value: type,
     label: type === "general" ? "General" : type,
   }));
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Wait one tick so the modal/input is mounted before focusing.
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById("new-item-name") as HTMLInputElement | null;
+      if (!el) return;
+      el.focus();
+      el.select();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [isOpen]);
 
   const resetCreateForm = () => {
     setNewItemName("");
@@ -75,11 +89,19 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
         </>
       }
     >
-      <div className="grid grid-cols-1 gap-3">
+      <form
+        className="grid grid-cols-1 gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void onCreate();
+        }}
+      >
         <Input
+          id="new-item-name"
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           placeholder="New item name"
+          enterKeyHint="done"
         />
 
         <Dropdown<Store>
@@ -95,7 +117,10 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
           onChange={setNewItemType}
           options={typeOptions}
         />
-      </div>
+
+        {/* Hidden submit helps mobile keyboards trigger form submission */}
+        <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
+      </form>
     </Modal>
   );
 }
