@@ -68,7 +68,6 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
       isOpen={isOpen}
       onClose={handleClose}
       title="Create item"
-      initialFocusSelector="input, textarea"
       footer={
         <>
           <Button label="Cancel" variant="secondary" onClick={handleClose} />
@@ -85,10 +84,12 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
       >
         <Input
           id="new-item-name"
+          autoFocus
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           placeholder="New item name"
           enterKeyHint="done"
+          className="text-base md:text-sm"
         />
 
         <Dropdown<Store>
