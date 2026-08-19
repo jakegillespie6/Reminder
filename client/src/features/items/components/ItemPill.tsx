@@ -97,6 +97,7 @@ export default function ItemPill({ item, highlight = false }: ItemPillProps) {
         side="top"
         align="left"
         openOnContextMenu
+        viewportTopInset={56}
         items={[
           {
             label: "Edit",
