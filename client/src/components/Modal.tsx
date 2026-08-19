@@ -74,7 +74,7 @@ export default function Modal({
       {isOpen && (
         <LayerContext.Provider value={zIndex}>
           <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black/40 p-4"
+            className="fixed inset-0 flex items-end sm:items-center justify-center bg-black/40 p-2 sm:p-4"
             style={{ zIndex }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -86,7 +86,7 @@ export default function Modal({
               role="dialog"
               aria-modal="true"
               aria-label={title}
-              className={`w-full ${maxWidthClassName} rounded-md border border-border bg-background-secondary p-4 shadow-xl`}
+              className={`w-full ${maxWidthClassName} rounded-md border border-border bg-background-secondary p-4 shadow-xl max-h-[calc(100dvh-0.5rem)] sm:max-h-[calc(100dvh-2rem)] overflow-y-auto mb-[env(safe-area-inset-bottom)]`}
               initial={{ opacity: 0, y: 80 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -80 }}
