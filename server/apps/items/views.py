@@ -1,9 +1,9 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.auth.services import GuestJWTAuthentication
+from common.views import ActionPermissionViewSet
 
 from .serializers import *
 from .services.base import (
@@ -14,15 +14,20 @@ from .services.base import (
 )
 
 
-class ItemViewset(viewsets.ViewSet):
+class ItemViewset(ActionPermissionViewSet):
     authentication_classes = [
         GuestJWTAuthentication,
         JWTAuthentication,
     ]
 
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-    ]
+    permission_classes = [IsAuthenticated]
+
+    permission_action_classes = {
+        "list": [AllowAny],
+        "create": [IsAuthenticated],
+        "partial_update": [IsAuthenticated],
+        "destroy": [IsAuthenticated],
+    }
 
     def create(self, request):
         serializer = ItemCreateSerializer(data=request.data)
