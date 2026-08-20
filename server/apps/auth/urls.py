@@ -4,12 +4,14 @@ from rest_framework.routers import DefaultRouter
 from .views.google import GoogleAuthView
 from .views.base import AuthBaseViewSet
 from .views.device import DeviceAuthView
+from .views.guest_pass import GuestPassView
 
 router = DefaultRouter()
 router.register("google", GoogleAuthView, basename="auth-google")
 router.register("base", AuthBaseViewSet, basename="auth-base")
 router.register("device", DeviceAuthView, basename="auth-device")
+router.register("guest-pass", GuestPassView, basename="auth-guest-pass")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

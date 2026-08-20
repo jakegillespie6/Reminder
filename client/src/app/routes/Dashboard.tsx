@@ -14,6 +14,7 @@ import {
   fetchItemFilters,
 } from "@features/global-settings/store/thunks";
 import { registerGlobalSettingsEvents } from "@features/global-settings/store/sse";
+import GuestPassQrCard from "@features/auth/components/GuestPassQrCard";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
@@ -109,6 +110,10 @@ export default function Dashboard() {
       }`}
     >
       <div className="mx-auto max-w-4xl space-y-6">
+        <div className="flex justify-end">
+          <GuestPassQrCard />
+        </div>
+
         <SortAndFilterList filters={filters} />
 
         <div className="p-4">

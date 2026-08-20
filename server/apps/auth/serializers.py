@@ -22,3 +22,18 @@ class DeviceApproveRequestSerializer(serializers.Serializer):
 class DevicePollRequestSerializer(serializers.Serializer):
     session_id = serializers.UUIDField()
     poll_token = serializers.UUIDField()
+
+class GuestPassRedeemRequestSerializer(serializers.Serializer):
+    code = serializers.CharField()
+
+class GuestPassStartResponseSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    redeem_url = serializers.URLField()
+    issued_at = serializers.DateTimeField()
+    expires_at = serializers.DateTimeField()
+    expires_in = serializers.IntegerField(min_value=1)
+
+class GuestPassRedeemResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    token_type = serializers.ChoiceField(choices=["Bearer"])
+    expires_in = serializers.IntegerField(min_value=1)

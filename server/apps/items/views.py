@@ -1,10 +1,13 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 from .serializers import *
 from .services.base import create_item, get_items, update_item, delete_item
-from rest_framework.response import Response
+
 
 class ItemViewset(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def create(self, request):
         serializer = ItemCreateSerializer(data=request.data)

@@ -1,7 +1,18 @@
 import axios from "axios";
 
+const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+  baseURL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Public client: no auth interceptor, no auto-refresh
+export const publicApi = axios.create({
+  baseURL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

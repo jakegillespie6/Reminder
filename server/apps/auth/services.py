@@ -5,10 +5,21 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from rest_framework.exceptions import APIException, AuthenticationFailed, NotFound, ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from .models import DeviceLoginSession
 
 Account = get_user_model()
+from datetime import timedelta
+from secrets import token_urlsafe
+from django.core.cache import cache
+GUEST_PASS_TTL_SECONDS = 30 * 60
+GUEST_PASS_SCOPES = ["items:create", "items:update", "filters:write"]
+
+
+class GoneError(APIException):
+    status_code = 410
+    default_detail = "Expired or invalid resource."
+    default_code = "gone"
 
 
 class ConflictError(APIException):
@@ -176,3 +187,51 @@ def device_poll(session_id: str, poll_token: str) -> dict:
     s.status = DeviceLoginSession.Status.CONSUMED
     s.save(update_fields=["status"])
     return {"status": "approved", **build_auth_response(s.approved_user)}
+
+
+def create_guest_pass(issuer_user) -> dict:
+    code = token_urlsafe(32)
+    expires_at = timezone.now() + timedelta(seconds=GUEST_PASS_TTL_SECONDS)
+
+    cache.set(
+        f"guest_pass:{code}",
+        {"issuer_id": issuer_user.id, "expires_at": expires_at.isoformat()},
+        timeout=GUEST_PASS_TTL_SECONDS,
+    )
+
+    frontend_url = getattr(settings, "CLIENT_URL", None) or settings.FRONTEND_URL
+    return {
+        "code": code,
+        "redeem_url": f"{frontend_url}/guest/redeem/{code}",
+        "issued_at": timezone.now().isoformat(),
+        "expires_at": expires_at.isoformat(),
+        "expires_in": GUEST_PASS_TTL_SECONDS,
+    }
+
+
+def redeem_guest_pass(code: str) -> dict:
+    if not code:
+        raise ValidationError("code is required")
+
+    data = cache.get(f"guest_pass:{code}")
+    if not data:
+        raise GoneError("expired or invalid pass")
+
+    # one-time use
+    cache.delete(f"guest_pass:{code}")
+
+    try:
+        issuer = Account.objects.get(id=data["issuer_id"])
+    except Account.DoesNotExist as exc:
+        raise NotFound("Issuing user not found.") from exc
+
+    token = AccessToken.for_user(issuer)
+    token["guest"] = True
+    token["scopes"] = GUEST_PASS_SCOPES
+    token.set_exp(lifetime=timedelta(seconds=GUEST_PASS_TTL_SECONDS))
+
+    return {
+        "access": str(token),
+        "token_type": "Bearer",
+        "expires_in": GUEST_PASS_TTL_SECONDS,
+    }
