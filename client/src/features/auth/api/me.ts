@@ -1,7 +1,30 @@
 import api from "@lib/api";
-import type { Account } from "../../accounts/types";
 
-export const me = async (): Promise<Account> => {
-  const response = await api.get<Account>("/auth/base/me/");
-  return response.data;
+export type AccountMe = {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
 };
+
+export type GuestMe = {
+  guest: true;
+  guest_session_id: string;
+  issuer: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+};
+
+export type MeResponse = AccountMe | GuestMe;
+
+export async function me(): Promise<MeResponse> {
+  const { data } = await api.get<MeResponse>("/auth/base/me/");
+  return data;
+}
+
+export function isGuestMe(value: MeResponse): value is GuestMe {
+  return (value as GuestMe).guest === true;
+}

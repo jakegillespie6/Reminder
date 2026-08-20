@@ -12,7 +12,24 @@ from ..services import refresh_tokens
 class AuthBaseViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['GET'], url_path='me', permission_classes=[IsAuthenticated])
     def me(self, request):
-        return Response(AccountSerializer(request.user).data, status=200)
+        user = request.user
+
+        if getattr(user, "is_guest", False):
+            return Response(
+                {
+                    "guest": True,
+                    "guest_session_id": str(user.id),
+                    "issuer": {
+                        "id": user.issuer.id,
+                        "email": user.issuer.email,
+                        "first_name": user.issuer.first_name,
+                        "last_name": user.issuer.last_name,
+                    },
+                },
+                status=200,
+            )
+
+        return Response(AccountSerializer(user).data, status=200)
 
     @action(detail=False, methods=['POST'], url_path='refresh-token', permission_classes=[AllowAny])
     def refresh_token(self, request):

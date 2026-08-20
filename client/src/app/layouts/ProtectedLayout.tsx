@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { IoLogOutOutline } from "react-icons/io5";
 import { useTheme, type Theme } from "../theme/ThemeProvider";
@@ -8,19 +8,59 @@ import { performSignOut } from "../../features/auth/utils/performSignOut";
 import { useCurrentAccount } from "../../features/auth/hooks/useCurrentAccount";
 import ThemeIndicator from "../../features/global-settings/components/ThemeIndicator";
 
+type GuestMe = {
+  guest: true;
+  guest_session_id: string;
+  issuer: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+};
+
+function isGuestMe(value: unknown): value is GuestMe {
+  return !!value && typeof value === "object" && (value as GuestMe).guest === true;
+}
+
+function readJwtExpSeconds(token: string | null): number | null {
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    const parsed = JSON.parse(json) as { exp?: number };
+    return typeof parsed.exp === "number" ? parsed.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function formatRemaining(seconds: number) {
+  const clamped = Math.max(0, seconds);
+  const m = Math.floor(clamped / 60);
+  const s = clamped % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 export default function ProtectedLayout() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { data: currentUser } = useCurrentAccount();
 
-  const fullName = currentUser
-    ? `${currentUser.first_name} ${currentUser.last_name}`
-    : "User";
+  const guest = isGuestMe(currentUser);
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
-  const initials =
-    `${currentUser?.first_name?.[0] ?? ""}${currentUser?.last_name?.[0] ?? ""}`
-      .toUpperCase() || "U";
+  const fullName = guest
+    ? "Guest session"
+    : currentUser
+      ? `${(currentUser as Account).first_name} ${(currentUser as Account).last_name}`
+      : "User";
+
+  const initials = guest
+    ? "G"
+    : `${(currentUser as Account | undefined)?.first_name?.[0] ?? ""}${(currentUser as Account | undefined)?.last_name?.[0] ?? ""}`.toUpperCase() || "U";
 
   const handleSignOut = () => {
     void performSignOut().finally(() => {
@@ -43,6 +83,29 @@ export default function ProtectedLayout() {
         ? "bg-accent text-accent-foreground"
         : "text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
     }`;
+
+  useEffect(() => {
+    if (!guest) {
+      setSecondsLeft(0);
+      return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    const exp = readJwtExpSeconds(token);
+    if (!exp) {
+      setSecondsLeft(0);
+      return;
+    }
+
+    const tick = () => {
+      const remaining = Math.floor(exp - Date.now() / 1000);
+      setSecondsLeft(Math.max(0, remaining));
+    };
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [guest]);
 
   return (
     <div className="h-screen bg-background-primary text-text-primary">
@@ -78,10 +141,12 @@ export default function ProtectedLayout() {
               trigger={
                 <div className="flex items-center gap-2 rounded-full border border-border bg-background-secondary px-2 py-1 hover:bg-surface-elevated">
                   <span
-                    className="grid h-7 w-7 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground"
+                    className={`grid place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground ${
+                      guest ? "h-7 min-w-[56px] px-2" : "h-7 w-7"
+                    }`}
                     aria-hidden
                   >
-                    {initials}
+                    {guest ? formatRemaining(secondsLeft) : initials}
                   </span>
                 </div>
               }
