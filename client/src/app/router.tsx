@@ -6,6 +6,7 @@ import DeviceVerify from "../features/auth/pages/DeviceVerify"; // add
 import Home from "./routes/Home";
 import Dashboard from "./routes/Dashboard";
 import ProtectedLayout from "./layouts/ProtectedLayout";
+import GuestRedeem from "@features/auth/pages/GuestRedeem";
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
   {
     path: "/device/verify/:sessionId", // add
     element: <DeviceVerify />,
+  },
+  {
+    path: "/guest/redeem/:code",
+    element: <GuestRedeem />,
   },
   {
     element: <AuthGuard />,
