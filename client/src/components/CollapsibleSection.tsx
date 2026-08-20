@@ -28,7 +28,7 @@ export default function CollapsibleSection({
         className="flex w-full items-center justify-between border-b border-border pb-2 text-left"
       >
         <h3
-          className={`text-sm font-semibold transition-colors ${
+          className={`text-base font-semibold transition-colors ${
             isOpen ? "text-text-primary" : "text-text-secondary"
           }`}
         >

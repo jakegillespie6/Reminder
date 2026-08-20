@@ -15,7 +15,7 @@ export default function FilterPill({ label, value, className = "" }: FilterPillP
         border border-accent/50
         bg-accent/10
         px-3 py-1
-        text-sm text-text-secondary
+        text-base text-text-secondary
         shadow-sm
         ${className}
       `}

@@ -29,7 +29,7 @@ export default function RefreshButton({ onSuccess, onError }: Props) {
         rounded-md
         bg-accent
         px-4 py-2
-        text-sm font-medium
+        text-base font-medium
         text-accent-foreground
         transition-colors
         hover:bg-accent-hover

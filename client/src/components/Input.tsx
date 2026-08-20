@@ -8,7 +8,7 @@ const baseInputClass = `
   border border-border
   bg-background-tertiary
   px-3 py-2
-  text-sm
+  text-base
   text-text-primary
   outline-none
   transition-colors

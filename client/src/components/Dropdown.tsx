@@ -110,7 +110,7 @@ export default function Dropdown<T extends string>({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "w-full h-[34px] rounded-md border border-border bg-background-tertiary px-3",
-          "text-sm text-text-primary flex items-center justify-between",
+          "text-base text-text-primary flex items-center justify-between",
           "disabled:cursor-not-allowed disabled:opacity-50"
         )}
       >
@@ -152,7 +152,7 @@ export default function Dropdown<T extends string>({
                               setOpen(false);
                             }}
                             className={cn(
-                              "w-full px-3 py-2 text-left text-sm flex items-center justify-between",
+                              "w-full px-3 py-2 text-left text-base flex items-center justify-between",
                               "hover:bg-background-secondary",
                               isSelected ? "text-accent" : "text-text-primary"
                             )}

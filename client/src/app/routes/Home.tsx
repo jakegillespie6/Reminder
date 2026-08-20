@@ -35,7 +35,7 @@ export default function Home() {
           <TabPanel value="calendar">
             <section className="space-y-3">
               <h2 className="text-lg font-semibold">Calendar</h2>
-              <p className="text-sm text-text-secondary">
+              <p className="text-base text-text-secondary">
                 Add your calendar view/component here.
               </p>
             </section>

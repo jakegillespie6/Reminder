@@ -78,7 +78,7 @@ export default function SignIn() {
         />
 
         <div className="my-6 border-t border-border pt-6">
-          <p className="mb-3 text-sm text-text-secondary">Or scan with your phone</p>
+          <p className="mb-3 text-base text-text-secondary">Or scan with your phone</p>
           {deviceSession && (
             <div className="flex flex-col items-center gap-3">
               <QRCodeCanvas value={deviceSession.verification_uri} size={180} />
@@ -89,7 +89,7 @@ export default function SignIn() {
           )}
         </div>
 
-        <p className="mt-6 text-sm text-text-secondary">
+        <p className="mt-6 text-base text-text-secondary">
           Don't have an account?{" "}
           <span
             className="cursor-pointer font-medium text-text-accent hover:underline"

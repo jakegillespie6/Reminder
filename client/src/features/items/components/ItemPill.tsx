@@ -72,7 +72,7 @@ export default function ItemPill({ item, highlight = false }: ItemPillProps) {
               rounded-full
               border
               px-3 py-1
-              text-sm
+              text-base
               text-text-primary
               shadow-sm
               transition-all duration-300

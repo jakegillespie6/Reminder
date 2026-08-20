@@ -19,7 +19,7 @@ export default function SortPill({ field, direction, className = "" }: SortPillP
         border border-accent/50
         bg-accent/10
         px-3 py-1
-        text-sm text-text-secondary
+        text-base text-text-secondary
         shadow-sm
         ${className}
       `}

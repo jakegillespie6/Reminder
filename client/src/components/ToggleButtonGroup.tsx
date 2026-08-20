@@ -49,7 +49,7 @@ export default function ToggleButtonGroup<T extends string>({
               onClick={() => onChange(option.value)}
               disabled={disabled}
               className={cn(
-                "flex-1 px-3 py-1.5 text-center text-sm font-medium transition-colors",
+                "flex-1 px-3 py-1.5 text-center text-base font-medium transition-colors",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 isActive
                   ? "bg-accent text-white"

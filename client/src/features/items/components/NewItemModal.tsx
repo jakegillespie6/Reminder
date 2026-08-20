@@ -89,7 +89,7 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
           onChange={(e) => setNewItemName(e.target.value)}
           placeholder="New item name"
           enterKeyHint="done"
-          className="text-base md:text-sm"
+          className="text-base md:text-base"
         />
 
         <Dropdown<Store>

@@ -223,7 +223,7 @@ export default function PopoverMenu({
                     item.onClick();
                     setOpen(false);
                   }}
-                  className={`flex w-full min-h-11 items-center gap-2 rounded-md px-4 py-2.5 sm:px-3 sm:py-2 text-left text-base sm:text-sm transition-colors
+                  className={`flex w-full min-h-11 items-center gap-2 rounded-md px-4 py-2.5 sm:px-3 sm:py-2 text-left text-base sm:text-base transition-colors
                     ${
                       item.danger
                         ? "text-red-400 hover:bg-red-500/10"

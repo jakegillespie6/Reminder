@@ -129,7 +129,7 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
     };
   }, []);
 
-  if (error) return <p className="text-sm text-danger">{error}</p>;
+  if (error) return <p className="text-base text-danger">{error}</p>;
 
   if (loading && !items.length) {
     return (
@@ -151,7 +151,7 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
     );
   }
 
-  if (!items.length) return <p className="text-sm text-text-tertiary">No items yet.</p>;
+  if (!items.length) return <p className="text-base text-text-tertiary">No items yet.</p>;
 
   return (
     <AnimatePresence mode="wait">

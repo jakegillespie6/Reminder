@@ -35,7 +35,7 @@ export default function ThemeSettingsSection() {
     border border-border
     bg-background-tertiary
     px-3 py-2
-    text-sm
+    text-base
     text-text-primary
     outline-none
     transition-colors
@@ -51,7 +51,7 @@ export default function ThemeSettingsSection() {
     border border-border
     bg-surface
     px-3 py-2
-    text-sm font-medium
+    text-base font-medium
     text-text-primary
     transition-colors
     hover:border-border-strong
@@ -65,7 +65,7 @@ export default function ThemeSettingsSection() {
       <h2 className="text-lg font-semibold text-text-primary">Theme</h2>
 
       <div className="flex items-center gap-2">
-        <label className="w-24 text-sm text-text-secondary">Theme</label>
+        <label className="w-24 text-base text-text-secondary">Theme</label>
 
         <select
           value={themeDraft}

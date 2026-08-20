@@ -15,7 +15,7 @@ export default function ThemeIndicator() {
 
   return (
     <div
-      className="inline-flex items-center gap-2 rounded-md border border-border bg-background-secondary px-2 py-1 text-sm text-text-primary"
+      className="inline-flex items-center gap-2 rounded-md border border-border bg-background-secondary px-2 py-1 text-base text-text-primary"
       aria-label={`Current theme: ${current.label}`}
       title={`Current theme: ${current.label}`}
     >

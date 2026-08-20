@@ -32,7 +32,7 @@ export default function SignUp() {
           }}
         />
 
-        <p className="mt-6 text-sm text-text-secondary">
+        <p className="mt-6 text-base text-text-secondary">
           Already have an account?{" "}
           <span
             className="cursor-pointer text-text-accent hover:underline"

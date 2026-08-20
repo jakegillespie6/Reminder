@@ -178,7 +178,7 @@ export function Tab({ value, children, disabled, className }: TabProps) {
       disabled={disabled}
       onClick={(e) => onChange(e, value)}
       className={cx(
-        "px-4 py-3 text-sm font-medium transition-colors",
+        "px-4 py-3 text-base font-medium transition-colors",
         selected ? "text-text-primary" : "text-text-secondary hover:text-text-primary",
         disabled && "cursor-not-allowed opacity-50",
         className

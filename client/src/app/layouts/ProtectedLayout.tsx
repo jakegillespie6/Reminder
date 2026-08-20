@@ -38,7 +38,7 @@ export default function ProtectedLayout() {
   ];
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+    `block rounded-md px-3 py-2 text-base font-medium transition-colors ${
       isActive
         ? "bg-accent text-accent-foreground"
         : "text-text-secondary hover:bg-surface-elevated hover:text-text-primary"

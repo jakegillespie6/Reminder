@@ -31,7 +31,7 @@ export default function DeviceVerify() {
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-sm rounded-lg border p-6 text-center">
         <h1 className="mb-2 text-xl font-semibold">Approve sign-in</h1>
-        <p className="mb-4 text-sm">Approve login for the other device?</p>
+        <p className="mb-4 text-base">Approve login for the other device?</p>
         <button className="rounded bg-black px-4 py-2 text-white" disabled={loading} onClick={onApprove}>
           {loading ? "Approving..." : "Approve"}
         </button>

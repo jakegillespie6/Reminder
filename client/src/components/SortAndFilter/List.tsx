@@ -97,7 +97,7 @@ export default function SortAndFilterList({
         </span>
 
         {!hasAny ? (
-          <p className="text-sm text-text-tertiary">{emptyText}</p>
+          <p className="text-base text-text-tertiary">{emptyText}</p>
         ) : (
           <motion.div
             layout
