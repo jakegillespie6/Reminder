@@ -2,15 +2,25 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.accounts.api import AccountSerializer
 from ..serializers import RefreshTokenRequestSerializer
-from ..services import refresh_tokens
-
+from ..services import refresh_tokens, GuestJWTAuthentication
 
 
 class AuthBaseViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=['GET'], url_path='me', permission_classes=[IsAuthenticated])
+    authentication_classes = [
+        GuestJWTAuthentication,
+        JWTAuthentication,
+    ]
+
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="me",
+        permission_classes=[IsAuthenticated],
+    )
     def me(self, request):
         user = request.user
 
@@ -31,10 +41,15 @@ class AuthBaseViewSet(viewsets.ViewSet):
 
         return Response(AccountSerializer(user).data, status=200)
 
-    @action(detail=False, methods=['POST'], url_path='refresh-token', permission_classes=[AllowAny])
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="refresh-token",
+        permission_classes=[AllowAny],
+    )
     def refresh_token(self, request):
         serializer = RefreshTokenRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        payload = refresh_tokens(serializer.validated_data['refresh'])
+        payload = refresh_tokens(serializer.validated_data["refresh"])
         return Response(payload, status=200)

@@ -9,7 +9,7 @@ export default function AuthGuard() {
   useEffect(() => {
     let cancelled = false;
 
-    async function run() {
+    (async () => {
       const access = localStorage.getItem("access_token");
       if (!access) {
         navigate("/sign-in", { replace: true });
@@ -18,7 +18,7 @@ export default function AuthGuard() {
       }
 
       try {
-        await me(); // works for normal user OR guest
+        await me(); // must return 200 for both normal user and guest
       } catch {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
@@ -26,9 +26,8 @@ export default function AuthGuard() {
       } finally {
         if (!cancelled) setChecking(false);
       }
-    }
+    })();
 
-    void run();
     return () => {
       cancelled = true;
     };

@@ -4,7 +4,6 @@ from django.utils import timezone
 from rest_framework.exceptions import APIException, AuthenticationFailed, NotFound, ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from ..models import DeviceLoginSession
 
 Account = get_user_model()

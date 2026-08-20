@@ -1,69 +1,86 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 const api = axios.create({
   baseURL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-// Public client: no auth interceptor, no auto-refresh
 export const publicApi = axios.create({
   baseURL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  const url = config.url ?? "";
-  const isRefreshRoute = /\/auth\/base\/refresh-token\/?$/.test(url);
+function parseJwtPayload(token: string | null): Record<string, unknown> | null {
+  if (!token) return null;
+  try {
+    const part = token.split(".")[1];
+    if (!part) return null;
+    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
 
-  if (token && !isRefreshRoute) {
+function isGuestToken(token: string | null): boolean {
+  const payload = parseJwtPayload(token);
+  return payload?.guest === true;
+}
+
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config as any;
-    const status = error?.response?.status;
-    const url = originalRequest?.url ?? "";
-    const isRefreshRoute = /\/auth\/base\/refresh-token\/?$/.test(url);
+  async (error: AxiosError) => {
+    const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const status = error.response?.status;
 
-    if (status === 401 && !originalRequest?._retry && !isRefreshRoute) {
-      originalRequest._retry = true;
-
-      try {
-        const refresh = localStorage.getItem("refresh_token");
-        if (!refresh) throw new Error("No refresh token");
-
-        const refreshResponse = await api.post("/auth/base/refresh-token/", { refresh });
-        const newAccess = refreshResponse?.data?.access;
-        if (!newAccess) throw new Error("No access token in refresh response");
-
-        localStorage.setItem("access_token", newAccess);
-        originalRequest.headers = originalRequest.headers ?? {};
-        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
-
-        return api(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("account");
-        return Promise.reject(refreshError);
-      }
+    if (!original || status !== 401 || original._retry) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    const access = localStorage.getItem("access_token");
+    const refresh = localStorage.getItem("refresh_token");
+
+    // Guest sessions are access-token only. Do not attempt refresh/logout here.
+    if (isGuestToken(access)) {
+      return Promise.reject(error);
+    }
+
+    if (!refresh) {
+      return Promise.reject(error);
+    }
+
+    original._retry = true;
+
+    try {
+      const { data } = await publicApi.post<{ access: string; refresh?: string }>(
+        "/auth/base/refresh-token/",
+        { refresh }
+      );
+
+      localStorage.setItem("access_token", data.access);
+      if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+
+      original.headers = original.headers ?? {};
+      original.headers.Authorization = `Bearer ${data.access}`;
+      return api(original);
+    } catch (refreshErr) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      return Promise.reject(refreshErr);
+    }
   }
 );
 
