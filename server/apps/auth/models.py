@@ -24,3 +24,40 @@ class DeviceLoginSession(models.Model):
     )
     expires_at = models.DateTimeField(default=device_session_expires_at)
     created_at = models.DateTimeField(auto_now_add=True)
+
+import uuid
+
+from django.conf import settings
+from django.db import models
+from django.utils import timezone
+
+
+class GuestSession(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    issuer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="guest_sessions",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    revoked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def is_valid(self):
+        return (
+            self.revoked_at is None
+            and self.expires_at > timezone.now()
+        )
+
+    
