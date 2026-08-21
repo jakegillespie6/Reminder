@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.auth.apps.AuthConfig",
     'apps.accounts',
     'apps.items',
+    'apps.calendar_events',
     "apps.global_settings",
     'django.contrib.sites',
     'corsheaders',
@@ -130,6 +131,12 @@ AUTHENTICATION_BACKENDS = [
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
 if not GOOGLE_OAUTH_CLIENT_ID:
     raise ValueError('GOOGLE_OAUTH_CLIENT_ID is missing in server/.env')
+
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
+if not GOOGLE_OAUTH_CLIENT_SECRET:
+    raise ValueError('GOOGLE_OAUTH_CLIENT_SECRET is missing in server/.env')
+
+BASE_URL = os.environ.get('BASE_URL', 'https://py-reminders.app')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

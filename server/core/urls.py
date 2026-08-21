@@ -6,5 +6,6 @@ urlpatterns = [
     path('auth/', include('apps.auth.urls')),
     path('items/', include('apps.items.urls')),
     path("global-settings/", include("apps.global_settings.urls")),
-    path("events/", include('common.events.urls'))
+    path("events/", include('common.events.urls')),
+    path('calendar-events/', include('apps.calendar_events.urls'))
 ]
