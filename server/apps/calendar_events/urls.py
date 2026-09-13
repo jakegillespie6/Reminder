@@ -1,10 +1,26 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import CalendarEventViewSet, GoogleCalendarWebhookView
+
+from .views import (
+    CalendarEventViewSet,
+    CalendarEventOccurrenceViewSet,
+)
 
 router = DefaultRouter()
-router.register("", CalendarEventViewSet, basename="calendar-events")
+router.register(
+    "",
+    CalendarEventViewSet,
+    basename="calendar-events",
+)
 
-urlpatterns = router.urls + [
-    path("webhook/google/", GoogleCalendarWebhookView.as_view(), name="google-webhook"),
+urlpatterns = [
+    path(
+        "<int:pk>/occurrence/",
+        CalendarEventOccurrenceViewSet.as_view({
+            "patch": "partial_update",
+            "delete": "destroy",
+        }),
+        name="calendar-event-occurrence",
+    ),
+    *router.urls,
 ]

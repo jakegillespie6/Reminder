@@ -13,6 +13,7 @@
       "@features/*": ["./src/features/*"],
       "@components/*": ["./src/components/*"],
       "@store/*": ["./src/store/*"]
-    }
+    },
+    "noEmit": true
   }
 }

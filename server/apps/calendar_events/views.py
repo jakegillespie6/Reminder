@@ -1,172 +1,212 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.accounts.models import Account
+from apps.auth.services import GuestJWTAuthentication
+from common.views import ActionPermissionViewSet
+
 from .models import CalendarEvent
+
 from .serializers import (
     CalendarEventSerializer,
+    CalendarEventQuerySerializer,
     EventOccurrenceSerializer,
-    EventRangeQuerySerializer,
-)
-from .services.base import list_events_in_range
-from .services.google_sync import (
-    full_sync_google_calendar,
-    incremental_sync_google_calendar,
-    setup_push_notifications,
-    stop_push_notifications,
+    CalendarEventOccurrenceUpdateSerializer,
+    CalendarEventOccurrenceDeleteSerializer,
 )
 
+from .services.base import (
+    create_event,
+    update_event,
+    delete_event,
+    list_events_in_range,
+    update_event_occurrence,
+    delete_event_occurrence,
+)
 
-class CalendarEventViewSet(viewsets.ModelViewSet):
-    queryset = CalendarEvent.objects.all()
-    serializer_class = CalendarEventSerializer
 
-    @action(detail=False, methods=["get"], url_path="within-range")
-    def within_range(self, request):
-        query = EventRangeQuerySerializer(data=request.query_params)
-        query.is_valid(raise_exception=True)
+class CalendarEventViewSet(ActionPermissionViewSet):
 
-        start_at = query.start_at
-        end_at = query.end_at
-        expand = query.validated_data["expand_recurrence"]
+    permission_classes = [
+        AllowAny,
+    ]
 
-        qs = CalendarEvent.objects.within_window(start_at, end_at).order_by("start_at")
-        rows = list_events_in_range(
-            queryset=qs,
-            start_at=start_at,
-            end_at=end_at,
-            expand_recurrence=expand,
+    permission_action_classes = {
+        "list": [AllowAny],
+
+        "create": [AllowAny],
+        "partial_update": [AllowAny],
+        "destroy": [AllowAny],
+
+        "update_occurrence": [AllowAny],
+        "delete_occurrence": [AllowAny],
+    }
+
+    def create(self, request):
+        serializer = CalendarEventSerializer(
+            data=request.data
         )
 
-        if expand:
-            return Response(EventOccurrenceSerializer(rows, many=True).data)
+        serializer.is_valid(
+            raise_exception=True
+        )
 
-        return Response(CalendarEventSerializer(rows, many=True).data)
+        event = create_event(
+            serializer.validated_data
+        )
 
-    @action(detail=False, methods=["post"], url_path="google/full-sync")
-    def google_full_sync(self, request):
-        """Perform a full sync with Google Calendar."""
-        if not request.user.is_authenticated:
-            return Response(
-                {"error": "Authentication required"},
-                status=status.HTTP_401_UNAUTHORIZED,
+        return Response(
+            CalendarEventSerializer(event).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def list(self, request):
+        query_serializer = CalendarEventQuerySerializer(
+            data=request.query_params
+        )
+
+        query_serializer.is_valid(
+            raise_exception=True
+        )
+
+        filters = query_serializer.validated_data
+
+        qs = (
+            CalendarEvent.objects
+            .all()
+            .prefetch_related("exceptions")
+        )
+
+        start_date = filters.get("start_date")
+        end_date = filters.get("end_date")
+
+        expand = filters.get(
+            "expand_recurrence",
+            True,
+        )
+
+        if start_date and end_date:
+            qs = (
+                qs
+                .within_window(
+                    start_date,
+                    end_date,
+                )
+                .order_by("start_date")
             )
 
-        if not request.user.google_id:
-            return Response(
-                {"error": "Google account not linked"},
-                status=status.HTTP_400_BAD_REQUEST,
+            rows = list_events_in_range(
+                queryset=qs,
+                start_date=start_date,
+                end_date=end_date,
+                expand_recurrence=expand,
             )
 
-        try:
-            created_count, sync_token = full_sync_google_calendar(request.user)
-            return Response({
-                "created": created_count,
-                "message": "Full sync completed",
-            })
-        except Exception as e:
+            if expand:
+                return Response(
+                    EventOccurrenceSerializer(
+                        rows,
+                        many=True,
+                    ).data
+                )
+
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                CalendarEventSerializer(
+                    rows,
+                    many=True,
+                ).data
             )
 
-    @action(detail=False, methods=["post"], url_path="google/setup-watch")
-    def google_setup_watch(self, request):
-        """Set up push notifications for Google Calendar changes."""
-        if not request.user.is_authenticated:
-            return Response(
-                {"error": "Authentication required"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+        return Response(
+            CalendarEventSerializer(
+                qs,
+                many=True,
+            ).data
+        )
 
-        if not request.user.google_id:
-            return Response(
-                {"error": "Google account not linked"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    def partial_update(
+        self,
+        request,
+        pk=None,
+    ):
+        event = CalendarEvent.objects.get(
+            pk=pk
+        )
 
-        try:
-            # Do full sync first if no sync token
-            if not request.user.google_sync_token:
-                full_sync_google_calendar(request.user)
+        serializer = CalendarEventSerializer(
+            event,
+            data=request.data,
+            partial=True,
+        )
 
-            # Set up watch
-            result = setup_push_notifications(request.user)
-            return Response({
-                "channel_id": result.get("id"),
-                "expiration": request.user.google_channel_expiration,
-                "message": "Watch channel created",
-            })
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        serializer.is_valid(
+            raise_exception=True
+        )
 
-    @action(detail=False, methods=["post"], url_path="google/stop-watch")
-    def google_stop_watch(self, request):
-        """Stop push notifications for Google Calendar."""
-        if not request.user.is_authenticated:
-            return Response(
-                {"error": "Authentication required"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+        event = update_event(
+            pk,
+            serializer.validated_data,
+        )
 
-        try:
-            stop_push_notifications(request.user)
-            return Response({"message": "Watch channel stopped"})
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        return Response(
+            CalendarEventSerializer(event).data
+        )
+
+    def destroy(
+        self,
+        request,
+        pk=None,
+    ):
+        delete_event(pk)
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class GoogleCalendarWebhookView(APIView):
-    """
-    Webhook endpoint for Google Calendar push notifications.
-    Google sends POST requests here when calendar events change.
-    """
-    authentication_classes = []  # No auth - Google can't authenticate
-    permission_classes = []
+class CalendarEventOccurrenceViewSet(ActionPermissionViewSet):
+    permission_classes = [AllowAny]
 
-    def post(self, request):
-        # Google sends these headers
-        channel_id = request.headers.get("X-Goog-Channel-ID", "")
-        resource_state = request.headers.get("X-Goog-Resource-State", "")
-        channel_token = request.headers.get("X-Goog-Channel-Token", "")
+    def partial_update(self, request, pk=None):
+        serializer = CalendarEventOccurrenceUpdateSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
 
-        # Parse account ID from token
-        account_id = None
-        if channel_token:
-            for part in channel_token.split("&"):
-                if part.startswith("account_id="):
-                    try:
-                        account_id = int(part.split("=")[1])
-                    except ValueError:
-                        pass
+        occurrence = update_event_occurrence(
+            event_id=pk,
+            data=serializer.validated_data,
+        )
 
-        # Handle sync notification (initial confirmation)
-        if resource_state == "sync":
-            return Response(status=status.HTTP_200_OK)
+        return Response(
+            EventOccurrenceSerializer(occurrence).data
+        )
 
-        # Handle actual changes
-        if resource_state in ("exists", "update"):
-            if account_id:
-                try:
-                    account = Account.objects.get(
-                        id=account_id,
-                        google_channel_id=channel_id,
-                    )
-                    # Perform incremental sync
-                    incremental_sync_google_calendar(account)
-                except Account.DoesNotExist:
-                    pass  # Invalid channel, ignore
+    def destroy(self, request, pk=None):
+        data = request.data.copy()
 
-        return Response(status=status.HTTP_200_OK)
+        if (
+            "occurrence_date" not in data
+            and request.query_params.get("occurrence_date")
+        ):
+            data["occurrence_date"] = request.query_params[
+                "occurrence_date"
+            ]
+
+        serializer = CalendarEventOccurrenceDeleteSerializer(
+            data=data
+        )
+        serializer.is_valid(raise_exception=True)
+
+        delete_event_occurrence(
+            event_id=pk,
+            occurrence_date=serializer.validated_data[
+                "occurrence_date"
+            ],
+        )
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )

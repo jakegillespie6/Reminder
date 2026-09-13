@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Callable
 
 from apps.items.models import ITEM_QUERY_FILTERS, Item
-from ..models import ThemeChoices, CalendarChoices
+from ..models import ThemeChoices
 
 
 class UnsupportedSettingError(Exception):
@@ -64,17 +65,38 @@ def _validate_item_filters(value: Any) -> dict[str, Any]:
     return value
 
 
+def _validate_calendar_range(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        raise InvalidSettingValueError("'calendar_range' must be an object with 'start_at' and 'end_at'.")
+
+    if "start_at" not in value or "end_at" not in value:
+        raise InvalidSettingValueError("'calendar_range' requires both 'start_at' and 'end_at'.")
+
+    try:
+        start_at = datetime.fromisoformat(value["start_at"].replace("Z", "+00:00"))
+        end_at = datetime.fromisoformat(value["end_at"].replace("Z", "+00:00"))
+    except (ValueError, TypeError, AttributeError) as exc:
+        raise InvalidSettingValueError("'start_at' and 'end_at' must be valid ISO 8601 datetime strings.") from exc
+
+    if end_at <= start_at:
+        raise InvalidSettingValueError("'end_at' must be after 'start_at'.")
+
+    return {
+        "start_at": start_at.isoformat(),
+        "end_at": end_at.isoformat(),
+    }
+
+
 THEME_VALUES = {c.value for c in ThemeChoices}
-CALENDAR_VALUES = {c.value for c in CalendarChoices}
 
 SETTING_DEFINITIONS: dict[str, SettingSpec] = {
     "theme": SettingSpec(
         default=ThemeChoices.DARK,
         validator=lambda v: _validate_choice("theme", v, THEME_VALUES),
     ),
-    "calendar": SettingSpec(
-        default=CalendarChoices.WEEKLY,
-        validator=lambda v: _validate_choice("calendar", v, CALENDAR_VALUES),
+    "calendar_range": SettingSpec(
+        default=None,
+        validator=_validate_calendar_range,
     ),
     "item_filters": SettingSpec(
         default={"purchased": False},

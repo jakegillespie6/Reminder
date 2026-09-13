@@ -12,7 +12,7 @@ load_dotenv(BASE_DIR / '.env')  # load server/.env explicitly
 SECRET_KEY = 'django-secure-c3govzzp!eqlwbo@-l5^#4@i38pg*#q$8x)e4x3^-s$&k$ns=v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "py-reminders.app",

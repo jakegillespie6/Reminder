@@ -3,6 +3,7 @@ import ThemeSettingsSection from "@features/global-settings/components/ThemeSett
 import CalendarSettingsSection from "@features/global-settings/components/CalendarSettingsSection";
 import ItemFiltersSettingsSection from "@features/global-settings/components/ItemFiltersSettingsSection";
 import ItemsManagerSection from "@features/items/components/ItemsManagerSection";
+import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventsScheduler";
 import { Tabs, TabsList, Tab, TabPanel } from "@components/Tabs";
 import CollapsibleSection from "@components/CollapsibleSection";
 
@@ -33,12 +34,7 @@ export default function Home() {
           </TabPanel>
 
           <TabPanel value="calendar">
-            <section className="space-y-3">
-              <h2 className="text-lg font-semibold">Calendar</h2>
-              <p className="text-base text-text-secondary">
-                Add your calendar view/component here.
-              </p>
-            </section>
+            <CalendarEventsScheduler />
           </TabPanel>
 
           <TabPanel value="global">

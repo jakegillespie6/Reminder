@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -28,6 +29,7 @@ type PopoverMenuProps = {
   className?: string;
   offset?: number;
   viewportTopInset?: number; // reserved top area (e.g. fixed header height)
+  anchorPoint?: { x: number; y: number } | null;
 };
 
 export default function PopoverMenu({
@@ -42,6 +44,7 @@ export default function PopoverMenu({
   className = "",
   offset = 6,
   viewportTopInset = 0,
+  anchorPoint = null,
 }: PopoverMenuProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ left: 0, top: 0 });
@@ -59,10 +62,13 @@ export default function PopoverMenu({
   const isControlled = typeof open === "boolean";
   const isOpen = isControlled ? open : internalOpen;
 
-  const setOpen = (next: boolean) => {
-    if (!isControlled) setInternalOpen(next);
-    onOpenChange?.(next);
-  };
+  const setOpen = useCallback(
+    (next: boolean) => {
+      if (!isControlled) setInternalOpen(next);
+      onOpenChange?.(next);
+    },
+    [isControlled, onOpenChange]
+  );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -88,7 +94,7 @@ export default function PopoverMenu({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, []);
+  }, [setOpen]);
 
   useLayoutEffect(() => {
     if (!isOpen) {
@@ -114,9 +120,11 @@ export default function PopoverMenu({
       let resolvedSide: "top" | "bottom" = side;
       let resolvedAlign: "left" | "right" = align;
 
-      if (contextPoint) {
-        left = contextPoint.x + offset;
-        top = contextPoint.y + offset;
+      const point = anchorPoint ?? contextPoint;
+
+      if (point) {
+        left = point.x + offset;
+        top = point.y + offset;
       } else {
         const triggerEl = triggerRef.current;
         if (!triggerEl) return;
@@ -151,7 +159,7 @@ export default function PopoverMenu({
       window.removeEventListener("resize", placeMenu);
       window.removeEventListener("scroll", placeMenu, true);
     };
-  }, [isOpen, align, side, items.length, contextPoint, offset, viewportTopInset]);
+  }, [isOpen, align, side, items.length, contextPoint, anchorPoint, offset, viewportTopInset]);
 
   const transformOrigin = `${placement.side === "top" ? "bottom" : "top"} ${
     placement.align === "right" ? "right" : "left"
