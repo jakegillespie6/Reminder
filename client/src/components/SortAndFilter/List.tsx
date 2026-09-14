@@ -72,14 +72,6 @@ export default function SortAndFilterList({
     });
   });
 
-  filters.type?.forEach((type) => {
-    filterPills.push({
-      key: `filter-type-${type}`,
-      label: "Type",
-      value: humanize(String(type)),
-    });
-  });
-
   const sortMeta = parseSort(filters.sort);
   const hasAny = filterPills.length > 0 || !!sortMeta;
 
