@@ -57,6 +57,23 @@ export default function ItemPill({ item, highlight = false }: ItemPillProps) {
     }
   };
 
+  const onTogglePurchased = async () => {
+    const purchased = !item.purchased;
+
+    const result = await dispatch(
+      updateItem({
+        id: item.id,
+        payload: { purchased },
+      })
+    );
+
+    if (updateItem.fulfilled.match(result)) {
+      toast.success(purchased ? "Marked as purchased" : "Marked as unpurchased");
+    } else {
+      toast.error(result.payload ?? "Update failed");
+    }
+  };
+
   const stateClasses = highlight ? "bg-accent/20 border-accent/60" : "bg-surface border-border";
 
   return (
@@ -105,10 +122,11 @@ export default function ItemPill({ item, highlight = false }: ItemPillProps) {
             onClick: () => setIsEditOpen(true),
           },
           {
-            label: "Mark as purchased",
+            label: item.purchased
+              ? "Mark as unpurchased"
+              : "Mark as purchased",
             icon: <FiCheck aria-hidden="true" />,
-            onClick: () => void onMarkPurchased(),
-            disabled: item.purchased,
+            onClick: () => void onTogglePurchased(),
           },
           {
             label: "Delete",

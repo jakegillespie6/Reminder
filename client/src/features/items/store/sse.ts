@@ -45,9 +45,6 @@ export const normalizeItemFilters = (value: unknown): ItemQueryParams => {
     const stores = toStringArray(raw.store);
     if (stores) next.store = stores as ItemQueryParams["store"];
 
-    const types = toStringArray(raw.type);
-    if (types) next.type = types as ItemQueryParams["type"];
-
     if (isSortOption(raw.sort)) {
         next.sort = raw.sort;
     }
@@ -65,20 +62,29 @@ const sameArray = <T>(a?: T[], b?: T[]) => {
 const areFiltersEqual = (a: ItemQueryParams, b: ItemQueryParams) =>
     a.purchased === b.purchased &&
     a.sort === b.sort &&
-    sameArray(a.store, b.store) &&
-    sameArray(a.type, b.type);
+    sameArray(a.store, b.store);
 
 const matchesFilters = (item: Item, filters: ItemQueryParams) => {
-    if (filters.purchased !== undefined && item.purchased !== filters.purchased) return false;
-    if (filters.store?.length && !filters.store.includes(item.store)) return false;
-    if (filters.type?.length && !filters.type.includes(item.type)) return false;
+    if (filters.purchased !== undefined && item.purchased !== filters.purchased) {
+        return false;
+    }
+
+    if (filters.store?.length && !filters.store.includes(item.store)) {
+        return false;
+    }
+
     return true;
 };
 
 const isSortOption = (value: unknown): value is SortOption =>
-    typeof value === "string" && (SORT_OPTIONS as readonly string[]).includes(value);
+    typeof value === "string" &&
+    (SORT_OPTIONS as readonly string[]).includes(value);
 
-const SORT_OPTIONS: readonly SortOption[] = ["created_at", "-created_at", "store", "type"];
+const SORT_OPTIONS: readonly SortOption[] = [
+    "created_at",
+    "-created_at",
+    "store",
+];
 
 export function registerItemEvents(dispatch: AppDispatch, getState: () => RootState) {
     const unsubCreated = eventStream.subscribe<Item>("item.created", (item) => {

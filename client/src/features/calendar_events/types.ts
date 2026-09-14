@@ -123,3 +123,13 @@ export type Weekday =
   | "FR"
   | "SA"
   | "SU";
+
+export type CalendarView = "day" | "week" | "month" | "year";
+
+export interface CalendarFilters {
+  view: CalendarView;
+  /** ISO date (YYYY-MM-DD) the view is anchored on. */
+  anchor_date: string;
+  show_completed: boolean;
+  sources: CalendarEventSource[];
+}

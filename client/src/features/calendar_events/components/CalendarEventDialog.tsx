@@ -16,9 +16,8 @@ import {
   TextField,
 } from "@mui/material";
 
-import {
-  DateTimePicker,
-} from "@mui/x-date-pickers/DateTimePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import {
   LocalizationProvider,
 } from "@mui/x-date-pickers/LocalizationProvider";
@@ -84,13 +83,52 @@ export function CalendarEventDialog({
   endMode,
   durationMinutes,
 }: CalendarEventDialogProps) {
-  const toDate = (value: string): Date | null =>
-    value ? new Date(value) : null;
+  const toDate = (value: string): Date | null => {
+    if (!value) return null;
+
+    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+
+    if (dateOnly) {
+      return new Date(
+        Number(dateOnly[1]),
+        Number(dateOnly[2]) - 1,
+        Number(dateOnly[3])
+      );
+    }
+
+    return new Date(value);
+  };
+
+  const toLocalDateString = (value: Date | null): string =>
+    !value
+      ? ""
+      : `${value.getFullYear()}-${String(
+          value.getMonth() + 1
+        ).padStart(2, "0")}-${String(value.getDate()).padStart(
+          2,
+          "0"
+        )}`;
+
   const toLocalDateTimeString = (value: Date | null): string =>
-    !value ? "" : [
-      `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`,
-      `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`,
-    ].join("T");
+    !value
+      ? ""
+      : [
+          toLocalDateString(value),
+          `${String(value.getHours()).padStart(2, "0")}:${String(
+            value.getMinutes()
+          ).padStart(2, "0")}`,
+        ].join("T");
+
+  const handleAllDayChange = (allDay: boolean) => {
+    onChange.timingType(allDay ? "all_day" : "exact");
+
+    const format = allDay
+      ? toLocalDateString
+      : toLocalDateTimeString;
+
+    onChange.startDate(format(toDate(startDate)));
+    onChange.endDate(format(toDate(endDate)));
+  };
 
   return (
     <Dialog
@@ -123,83 +161,127 @@ export function CalendarEventDialog({
               required
             />
 
-            <DateTimePicker
-              label="Start"
-              value={toDate(startDate)}
-              onChange={(value) =>
-                onChange.startDate(
-                  toLocalDateTimeString(value)
-                )
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={timingType === "all_day"}
+                  onChange={(event) =>
+                    handleAllDayChange(event.target.checked)
+                  }
+                />
               }
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  required: true,
-                },
-              }}
+              label="All day"
             />
 
-            {endMode === "duration" ? (
-              <FormControl fullWidth>
-                <InputLabel id="duration-label">
-                  Duration
-                </InputLabel>
+            {timingType === "all_day" ? (
+              <>
+                <DatePicker
+                  label="Start date"
+                  value={toDate(startDate)}
+                  onChange={(value) =>
+                    onChange.startDate(toLocalDateString(value))
+                  }
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                    },
+                  }}
+                />
 
-                <Select
-                  labelId="duration-label"
-                  label="Duration"
-                  value={durationMinutes}
-                  onChange={(event) =>
-                    onChange.durationMinutes(
-                      Number(event.target.value)
+                <DatePicker
+                  label="End date"
+                  value={toDate(endDate)}
+                  onChange={(value) =>
+                    onChange.endDate(toLocalDateString(value))
+                  }
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                    },
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <DateTimePicker
+                  label="Start"
+                  value={toDate(startDate)}
+                  onChange={(value) =>
+                    onChange.startDate(
+                      toLocalDateTimeString(value)
                     )
                   }
-                  fullWidth
-                >
-                  <MenuItem value={5}>5 minutes</MenuItem>
-                  <MenuItem value={15}>15 minutes</MenuItem>
-                  <MenuItem value={30}>30 minutes</MenuItem>
-                  <MenuItem value={60}>60 minutes</MenuItem>
-                </Select>
-              </FormControl>
-            ) : (
-              <DateTimePicker
-                label="End"
-                value={toDate(endDate)}
-                onChange={(value) =>
-                  onChange.endDate(
-                    toLocalDateTimeString(value)
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
-                  },
-                }}
-              />
-            )}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                    },
+                  }}
+                />
 
-            <Button
-              variant="text"
-              onClick={() =>
-                onChange.endMode(
-                  endMode === "duration"
-                    ? "custom"
-                    : "duration"
-                )
-              }
-              sx={{
-                alignSelf: "flex-start",
-                p: 0,
-                minWidth: 0,
-                textTransform: "none",
-              }}
-            >
-              {endMode === "duration"
-                ? "Custom End Date"
-                : "Duration"}
-            </Button>
+                {endMode === "duration" ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="duration-label">
+                      Duration
+                    </InputLabel>
+                    <Select
+                      labelId="duration-label"
+                      label="Duration"
+                      value={durationMinutes}
+                      onChange={(event) =>
+                        onChange.durationMinutes(
+                          Number(event.target.value)
+                        )
+                      }
+                    >
+                      <MenuItem value={5}>5 minutes</MenuItem>
+                      <MenuItem value={15}>15 minutes</MenuItem>
+                      <MenuItem value={30}>30 minutes</MenuItem>
+                      <MenuItem value={60}>60 minutes</MenuItem>
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <DateTimePicker
+                    label="End"
+                    value={toDate(endDate)}
+                    onChange={(value) =>
+                      onChange.endDate(
+                        toLocalDateTimeString(value)
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        required: true,
+                      },
+                    }}
+                  />
+                )}
+
+                <Button
+                  variant="text"
+                  onClick={() =>
+                    onChange.endMode(
+                      endMode === "duration"
+                        ? "custom"
+                        : "duration"
+                    )
+                  }
+                  sx={{
+                    alignSelf: "flex-start",
+                    p: 0,
+                    minWidth: 0,
+                    textTransform: "none",
+                  }}
+                >
+                  {endMode === "duration"
+                    ? "Custom End Date"
+                    : "Duration"}
+                </Button>
+              </>
+            )}
 
             <RecurrenceFields
               recurrence={recurrence}

@@ -8,9 +8,7 @@ import { useAppDispatch } from "@store/hooks";
 import { updateItem } from "../store";
 import {
   STORE_OPTIONS,
-  TYPE_OPTIONS,
   type Item,
-  type ItemType,
   type Store,
 } from "../types";
 
@@ -31,13 +29,11 @@ export default function UpdateItemModal({
 
   const [editName, setEditName] = useState(item.name);
   const [editStore, setEditStore] = useState<Store>(item.store);
-  const [editType, setEditType] = useState<ItemType>(item.type);
 
   useEffect(() => {
     if (!isOpen) return;
     setEditName(item.name);
     setEditStore(item.store);
-    setEditType(item.type);
   }, [isOpen, item]);
 
   const storeOptions: ReadonlyArray<DropdownOption<Store>> = STORE_OPTIONS.map((store) => ({
@@ -45,10 +41,6 @@ export default function UpdateItemModal({
     label: store === "general" ? "General" : store,
   }));
 
-  const typeOptions: ReadonlyArray<DropdownOption<ItemType>> = TYPE_OPTIONS.map((type) => ({
-    value: type,
-    label: type === "general" ? "General" : type,
-  }));
 
   const onSave = async () => {
     const name = editName.trim();
@@ -60,7 +52,6 @@ export default function UpdateItemModal({
         payload: {
           name,
           store: editStore,
-          type: editType,
         },
       })
     );
@@ -98,13 +89,6 @@ export default function UpdateItemModal({
           value={editStore}
           onChange={setEditStore}
           options={storeOptions}
-        />
-
-        <Dropdown<ItemType>
-          label="Type"
-          value={editType}
-          onChange={setEditType}
-          options={typeOptions}
         />
       </div>
     </Modal>

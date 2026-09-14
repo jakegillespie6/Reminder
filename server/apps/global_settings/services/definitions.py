@@ -3,8 +3,7 @@ from datetime import datetime
 from typing import Any, Callable
 
 from apps.items.models import ITEM_QUERY_FILTERS, Item
-from ..models import ThemeChoices
-
+from ..models import CalendarChoices, ThemeChoices
 
 class UnsupportedSettingError(Exception):
     pass
@@ -16,11 +15,55 @@ class InvalidSettingValueError(Exception):
 
 Validator = Callable[[Any], Any]
 
+CALENDAR_VIEW_VALUES = set(CalendarChoices.values)
+THEME_VALUES = set(ThemeChoices.values)
+
 
 @dataclass(frozen=True)
 class SettingSpec:
     default: Any
     validator: Validator
+
+
+def _validate_calendar_filters(value: Any) -> dict[str, Any]:
+    if value is None or value == {}:
+        return {"view": CalendarChoices.WEEKLY.value}
+
+    if not isinstance(value, dict):
+        raise InvalidSettingValueError("'calendar_filters' must be an object.")
+
+    result: dict[str, Any] = {}
+
+    start_str = value.get("start_date") or value.get("start_at")
+    end_str = value.get("end_date") or value.get("end_at")
+
+    if start_str and end_str:
+        try:
+            start_date = datetime.fromisoformat(str(start_str).replace("Z", "+00:00"))
+            end_date = datetime.fromisoformat(str(end_str).replace("Z", "+00:00"))
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise InvalidSettingValueError(
+                "Start and end dates must be valid ISO 8601 datetime strings."
+            ) from exc
+
+        if end_date <= start_date:
+            raise InvalidSettingValueError("End date must be after start date.")
+
+        result["start_date"] = start_date.isoformat()
+        result["end_date"] = end_date.isoformat()
+    elif start_str or end_str:
+        raise InvalidSettingValueError(
+            "'calendar_filters' requires both start and end date when filtering by date."
+        )
+
+    view_val = value.get("view", CalendarChoices.WEEKLY.value)
+    if view_val not in CALENDAR_VIEW_VALUES:
+        raise InvalidSettingValueError(
+            f"'view' must be one of: {', '.join(sorted(CALENDAR_VIEW_VALUES))}."
+        )
+    result["view"] = view_val
+
+    return result
 
 
 def _validate_choice(key: str, value: Any, allowed: set[str]) -> str:
@@ -87,16 +130,18 @@ def _validate_calendar_range(value: Any) -> dict[str, str]:
     }
 
 
-THEME_VALUES = {c.value for c in ThemeChoices}
-
 SETTING_DEFINITIONS: dict[str, SettingSpec] = {
     "theme": SettingSpec(
-        default=ThemeChoices.DARK,
+        default=ThemeChoices.DARK.value,
         validator=lambda v: _validate_choice("theme", v, THEME_VALUES),
     ),
     "calendar_range": SettingSpec(
-        default=None,
+        default={},
         validator=_validate_calendar_range,
+    ),
+    "calendar_filters": SettingSpec(
+        default={"view": CalendarChoices.WEEKLY.value},
+        validator=_validate_calendar_filters,
     ),
     "item_filters": SettingSpec(
         default={"purchased": False},

@@ -1,9 +1,15 @@
 import { create } from "zustand";
 
 import { calendarEventsApi } from "./api";
+import {
+  DEFAULT_CALENDAR_FILTERS,
+  areCalendarFiltersEqual,
+  computeRange,
+} from "./range";
 
 import type {
   CalendarEvent,
+  CalendarFilters,
   CreateCalendarEventPayload,
   EventOccurrence,
   ListCalendarEventsParams,
@@ -15,8 +21,21 @@ interface CalendarEventsState {
   occurrences: EventOccurrence[];
   events: CalendarEvent[];
 
+  filters: CalendarFilters;
+
   isLoading: boolean;
   error: string | null;
+
+  setFilters: (filters: CalendarFilters) => void;
+  refetchWithActiveFilters: () => Promise<EventOccurrence[]>;
+
+  // SSE-driven local state mutations.
+  upsertIncomingOccurrences: (occurrences: EventOccurrence[]) => void;
+  removeIncomingEvent: (eventId: number) => void;
+  removeIncomingOccurrence: (
+    eventId: number,
+    occurrenceDate: string
+  ) => void;
 
   fetchOccurrences: (
     params?: ListCalendarEventsParams
@@ -62,12 +81,85 @@ function getErrorMessage(
 }
 
 export const useCalendarEventsStore =
-  create<CalendarEventsState>((set) => ({
+  create<CalendarEventsState>((set, get) => ({
     occurrences: [],
     events: [],
 
+    filters: { ...DEFAULT_CALENDAR_FILTERS },
+
     isLoading: false,
     error: null,
+
+    setFilters: (filters) => {
+      if (areCalendarFiltersEqual(get().filters, filters)) return;
+      set({ filters });
+    },
+
+    refetchWithActiveFilters: async () => {
+      const { view, anchor_date } = get().filters;
+      return get().fetchOccurrences(computeRange(view, anchor_date));
+    },
+
+    upsertIncomingOccurrences: (incoming) => {
+      const { view, anchor_date, show_completed, sources } = get().filters;
+      const { start_date, end_date } = computeRange(view, anchor_date);
+
+      set((state) => {
+        const next = [...state.occurrences];
+
+        for (const occ of incoming) {
+          const inRange =
+            occ.start_date.slice(0, 10) <= end_date &&
+            occ.end_date.slice(0, 10) >= start_date;
+
+          const passesCompleted = show_completed || !occ.complete;
+
+          const idx = next.findIndex(
+            (o) =>
+              o.event_id === occ.event_id &&
+              o.occurrence_date === occ.occurrence_date
+          );
+
+          if (!inRange || !passesCompleted) {
+            if (idx !== -1) next.splice(idx, 1);
+            continue;
+          }
+
+          if (idx === -1) next.push(occ);
+          else next[idx] = occ;
+        }
+
+        return {
+          occurrences: next.sort((a, b) =>
+            a.start_date.localeCompare(b.start_date)
+          ),
+        };
+      });
+
+      // `sources` filtering is applied server-side on refetch.
+      void sources;
+    },
+
+    removeIncomingEvent: (eventId) => {
+      set((state) => ({
+        events: state.events.filter((e) => e.id !== eventId),
+        occurrences: state.occurrences.filter(
+          (o) => o.event_id !== eventId
+        ),
+      }));
+    },
+
+    removeIncomingOccurrence: (eventId, occurrenceDate) => {
+      set((state) => ({
+        occurrences: state.occurrences.filter(
+          (o) =>
+            !(
+              o.event_id === eventId &&
+              o.occurrence_date === occurrenceDate
+            )
+        ),
+      }));
+    },
 
     fetchOccurrences: async (params) => {
       set({

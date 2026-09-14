@@ -5,48 +5,43 @@ from .models import Item
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['id', 'name', 'store', 'type', 'purchased', 'created_at']
+        fields = ['id', 'name', 'store', 'purchased', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class ItemCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=64, required=True)
-    store = serializers.ChoiceField(choices=Item.Store.choices, required=False)
-    type = serializers.ChoiceField(choices=Item.ItemType.choices, required=False)
+    store = serializers.ChoiceField(
+        choices=Item.Store.choices,
+        required=False,
+    )
 
 class ItemUpdateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=64, required=False)  # not required for partial update
-    store = serializers.ChoiceField(choices=Item.Store.choices, required=False)
-    type = serializers.ChoiceField(choices=Item.ItemType.choices, required=False)
+    name = serializers.CharField(max_length=64, required=False)
+    store = serializers.ChoiceField(
+        choices=Item.Store.choices,
+        required=False,
+    )
     purchased = serializers.BooleanField(required=False)
-    
+
 class ItemQuerySerializer(serializers.Serializer):
     SORT_CHOICES = [
         ('created_at', 'Created At (Ascending)'),
         ('-created_at', 'Created At (Descending)'),
         ('store', 'Store'),
-        ('type', 'Type'),
     ]
 
-    # Filters - support multiple values
     store = serializers.ListField(
         child=serializers.ChoiceField(choices=Item.Store.choices),
-        required=False
-    )
-    type = serializers.ListField(
-        child=serializers.ChoiceField(choices=Item.ItemType.choices),
-        required=False
+        required=False,
     )
 
-    # Important: allow_null prevents missing query param from becoming False
     purchased = serializers.BooleanField(required=False, allow_null=True)
-
-    # Sort - only one value allowed
     sort = serializers.ChoiceField(choices=SORT_CHOICES, required=False)
 
     def to_internal_value(self, data):
         mutable_data = data.copy()
 
-        for field in ['store', 'type']:
+        for field in ['store']:
             if field not in mutable_data:
                 continue
 

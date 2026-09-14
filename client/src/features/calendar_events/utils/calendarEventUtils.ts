@@ -1,5 +1,5 @@
 import type { EventOccurrence, Weekday } from "../types";
-
+import type { TimingType } from "../types";
 export const WEEKDAYS: {
   value: Weekday;
   label: string;
@@ -46,3 +46,19 @@ export function toDatetimeLocal(
     `${pad(date.getHours())}:${pad(date.getMinutes())}`,
   ].join("T");
 }
+
+export const toPayloadDate = (
+  value: string,
+  timingType: TimingType
+): string => {
+  if (timingType !== "all_day") {
+    return new Date(value).toISOString();
+  }
+
+  const [year, month, day] = value
+    .slice(0, 10)
+    .split("-")
+    .map(Number);
+
+  return new Date(year, month - 1, day).toISOString();
+};

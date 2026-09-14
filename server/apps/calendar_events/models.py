@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from zoneinfo import ZoneInfo
 
 
 class CalendarEventQuerySet(models.QuerySet):
@@ -204,10 +205,12 @@ class CalendarEvent(models.Model):
 
     @property
     def is_multi_day(self) -> bool:
-        return (
-            self.start_date.date()
-            != self.end_date.date()
-        )
+        event_timezone = ZoneInfo(self.timezone)
+
+        start = self.start_date.astimezone(event_timezone)
+        end = self.end_date.astimezone(event_timezone)
+
+        return start.date() != end.date()
 
     class Meta:
         ordering = ["start_date"]

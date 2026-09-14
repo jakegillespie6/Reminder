@@ -7,7 +7,7 @@ import { ThemeProvider } from "./theme/ThemeProvider";
 import { useAppDispatch } from "@store/hooks";
 import {
   fetchTheme,
-  fetchCalendar,
+  fetchCalendarFilters,
   fetchItemFilters,
 } from "@features/global-settings/store/thunks";
 
@@ -17,7 +17,7 @@ export default function App() {
   useEffect(() => {
     // Initial settings fetch on app open
     void dispatch(fetchTheme());
-    void dispatch(fetchCalendar());
+    void dispatch(fetchCalendarFilters());
     void dispatch(fetchItemFilters());
   }, [dispatch]);
 

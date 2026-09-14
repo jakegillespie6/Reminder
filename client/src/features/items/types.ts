@@ -8,53 +8,39 @@ export const STORE_OPTIONS = [
   "general",
 ] as const;
 
-export const TYPE_OPTIONS = [
-  "grocery",
-  "supplies",
-  "household",
-  "personal_care",
-  "electronics",
-  "general",
-] as const;
-
-export const SORT_OPTIONS = ["created_at", "-created_at", "store", "type"] as const;
+export const SORT_OPTIONS = ["created_at", "-created_at", "store"] as const;
 
 export type Store = (typeof STORE_OPTIONS)[number];
-export type ItemType = (typeof TYPE_OPTIONS)[number];
 export type SortOption = (typeof SORT_OPTIONS)[number];
 
 export interface Item {
-    id: number;
-    name: string;
-    store: Store;
-    type: ItemType;
-    purchased: boolean;
-    created_at: string;
+  id: number;
+  name: string;
+  store: Store;
+  purchased: boolean;
+  created_at: string;
 }
 
 export interface ItemCreatePayload {
-    name: string;
-    store?: Store;
-    type?: ItemType;
+  name: string;
+  store?: Store;
 }
 
 export interface ItemUpdatePayload {
-    name?: string;
-    store?: Store;
-    type?: ItemType;
-    purchased?: boolean;
+  name?: string;
+  store?: Store;
+  purchased?: boolean;
 }
 
 export interface ItemQueryParams {
-    store?: Store[];
-    type?: ItemType[];
-    purchased?: boolean;
-    sort?: SortOption;
+  store?: Store[];
+  purchased?: boolean;
+  sort?: SortOption;
 }
 
 export interface ItemsState {
-    items: Item[];
-    loading: boolean;
-    error: string | null;
-    filters: ItemQueryParams;
+  items: Item[];
+  loading: boolean;
+  error: string | null;
+  filters: ItemQueryParams;
 }

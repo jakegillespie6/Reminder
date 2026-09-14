@@ -6,7 +6,7 @@ import Input from "@components/Input";
 import Dropdown, { type DropdownOption } from "@components/Dropdown";
 import { useAppDispatch } from "@store/hooks";
 import { createItem } from "../store";
-import { STORE_OPTIONS, TYPE_OPTIONS, type ItemType, type Store } from "../types";
+import { STORE_OPTIONS, type Store } from "../types";
 
 type NewItemModalProps = {
   isOpen: boolean;
@@ -19,22 +19,16 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
 
   const [newItemName, setNewItemName] = useState("");
   const [newItemStore, setNewItemStore] = useState<Store>("general");
-  const [newItemType, setNewItemType] = useState<ItemType>("general");
+
 
   const storeOptions: ReadonlyArray<DropdownOption<Store>> = STORE_OPTIONS.map((store) => ({
     value: store,
     label: store === "general" ? "General" : store,
   }));
 
-  const typeOptions: ReadonlyArray<DropdownOption<ItemType>> = TYPE_OPTIONS.map((type) => ({
-    value: type,
-    label: type === "general" ? "General" : type,
-  }));
-
   const resetCreateForm = () => {
     setNewItemName("");
     setNewItemStore("general");
-    setNewItemType("general");
   };
 
   const handleClose = () => {
@@ -50,7 +44,6 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
       createItem({
         name,
         store: newItemStore,
-        type: newItemType,
       })
     );
 
@@ -99,12 +92,6 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
           options={storeOptions}
         />
 
-        <Dropdown<ItemType>
-          label="Type"
-          value={newItemType}
-          onChange={setNewItemType}
-          options={typeOptions}
-        />
 
         {/* Hidden submit helps mobile keyboards trigger form submission */}
         <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />

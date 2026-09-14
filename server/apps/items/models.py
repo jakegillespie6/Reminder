@@ -4,7 +4,6 @@ from django.db import models
 ITEM_QUERY_FILTERS = {
     "purchased",      # bool
     "store",          # one of Item.Store values
-    "type",           # one of Item.ItemType values
     "not_purchased",  # bool-like toggle if you want it
 }
 
@@ -18,17 +17,11 @@ class ItemQuerySet(models.QuerySet):
     def by_store(self, store):
         return self.filter(store=store)
 
-    def by_type(self, item_type):
-        return self.filter(type=item_type)
-
     def sort_by_created_at(self, descending=False):
         return self.order_by('-created_at' if descending else 'created_at')
 
     def sort_by_store(self):
         return self.order_by('store')
-
-    def sort_by_type(self):
-        return self.order_by('type')
 
 
 class ItemManager(models.Manager):
@@ -44,9 +37,6 @@ class ItemManager(models.Manager):
     def by_store(self, store):
         return self.get_queryset().by_store(store)
 
-    def by_type(self, item_type):
-        return self.get_queryset().by_type(item_type)
-
 
 class Item(models.Model):
     class Store(models.TextChoices):
@@ -58,19 +48,10 @@ class Item(models.Model):
         RANCH_99 = '99_ranch', '99 Ranch'
         GENERAL = 'general', 'General'
 
-    class ItemType(models.TextChoices):
-        GROCERY = 'grocery', 'Grocery'
-        SUPPLIES = 'supplies', 'Supplies'
-        HOUSEHOLD = 'household', 'Household'
-        PERSONAL_CARE = 'personal_care', 'Personal Care'
-        ELECTRONICS = 'electronics', 'Electronics'
-        GENERAL = 'general', 'General'
-
     name = models.CharField(max_length=64)
     store = models.CharField(max_length=20, choices=Store.choices, default=Store.GENERAL)
     created_at = models.DateTimeField(auto_now_add=True)
     purchased = models.BooleanField(default=False)
-    type = models.CharField(max_length=20, choices=ItemType.choices, default=ItemType.GENERAL)
 
     objects = ItemManager()
 

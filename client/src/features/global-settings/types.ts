@@ -1,48 +1,51 @@
-import type { Store, ItemType, SortOption } from "@features/items/types";
+import type { Store, SortOption } from "@features/items/types";
 
-export type Theme = "dark" | "light" | "abyssal";
-export type CalendarView = "monthly" | "weekly" | "daily";
+export type Theme = "light" | "dark" | "abyssal";
+export type CalendarView = "daily" | "weekly" | "monthly" | "agenda";
 
-export const CALENDAR_VIEW_OPTIONS: ReadonlyArray<{
-  value: CalendarView;
-  label: string;
-}> = [
+export interface CalendarFilters {
+  start_date?: string;
+  end_date?: string;
+  view?: CalendarView;
+}
+
+export const CALENDAR_VIEW_OPTIONS: { value: CalendarView; label: string }[] = [
   { value: "daily", label: "Daily" },
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
+  { value: "agenda", label: "Agenda" },
 ];
 
 // Use the same shape as items store/query filters
 export type ItemFilters = {
   purchased?: boolean;
   store?: Store;      // changed from Store[]
-  type?: ItemType;    // changed from ItemType[]
   sort?: SortOption;
 };
 
-export type GlobalSettingKey = "theme" | "calendar" | "item_filters";
+export type GlobalSettingKey = "theme" | "calendar_filters" | "item_filters";
 
 export interface GlobalSettingResponse<T> {
   key: GlobalSettingKey;
   value: T;
-  updated_at: string;
+  updated_at: string | null;
 }
 
 export type AsyncStatus = "idle" | "loading" | "succeeded" | "failed";
 
 export interface GlobalSettingsState {
   theme: Theme | null;
-  calendar: CalendarView | null;
+  calendarFilters: CalendarFilters | null;
   itemFilters: ItemFilters;
   updatedAt: {
     theme: string | null;
-    calendar: string | null;
+    calendarFilters: string | null;
     itemFilters: string | null;
   };
   status: {
-    theme: AsyncStatus;
-    calendar: AsyncStatus;
-    itemFilters: AsyncStatus;
+    theme: "idle" | "loading" | "succeeded" | "failed";
+    calendarFilters: "idle" | "loading" | "succeeded" | "failed";
+    itemFilters: "idle" | "loading" | "succeeded" | "failed";
   };
   error: string | null;
 }

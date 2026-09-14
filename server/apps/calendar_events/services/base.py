@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+
 from dateutil.rrule import (
     DAILY,
     WEEKLY,
@@ -226,6 +227,18 @@ def _iter_occurrence_starts(
         yield occurrence_start
 
 
+def _is_multi_day(
+    event: CalendarEvent,
+    start_date: datetime,
+    end_date: datetime,
+) -> bool:
+    event_timezone = ZoneInfo(event.timezone)
+    local_start = start_date.astimezone(event_timezone)
+    local_end = end_date.astimezone(event_timezone)
+
+    return local_start.date() != local_end.date()
+
+
 def _make_row(
     *,
     event: CalendarEvent,
@@ -248,7 +261,11 @@ def _make_row(
         "duration_seconds": int(
             (end_date - start_date).total_seconds()
         ),
-        "is_multi_day": start_date.date() != end_date.date(),
+        "is_multi_day": _is_multi_day(
+            event,
+            start_date,
+            end_date,
+        ),
         "complete": event.complete if complete is None else complete,
         "timing_type": (
             event.timing_type

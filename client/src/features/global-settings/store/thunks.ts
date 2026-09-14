@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { ItemQueryParams } from "@features/items/types";
 import { globalSettingsApi } from "../api";
-import type { Theme, CalendarView, ItemFilters, GlobalSettingResponse } from "../types";
+import type { Theme, CalendarFilters, ItemFilters, GlobalSettingResponse } from "../types";
 
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
@@ -27,22 +27,22 @@ export const updateTheme = createAsyncThunk(
   }
 );
 
-export const fetchCalendar = createAsyncThunk(
-  "globalSettings/fetchCalendar",
+export const fetchCalendarFilters = createAsyncThunk(
+  "globalSettings/fetchCalendarFilters",
   async (_, { rejectWithValue }) => {
     try {
-      return await globalSettingsApi.getCalendar();
+      return await globalSettingsApi.getCalendarFilters();
     } catch (err) {
       return rejectWithValue(getErrorMessage(err));
     }
   }
 );
 
-export const updateCalendar = createAsyncThunk(
-  "globalSettings/updateCalendar",
-  async (value: CalendarView, { rejectWithValue }) => {
+export const updateCalendarFilters = createAsyncThunk(
+  "globalSettings/updateCalendarFilters",
+  async (value: CalendarFilters | null, { rejectWithValue }) => {
     try {
-      return await globalSettingsApi.updateCalendar(value);
+      return await globalSettingsApi.updateCalendarFilters(value);
     } catch (err) {
       return rejectWithValue(getErrorMessage(err));
     }
@@ -63,7 +63,6 @@ export const fetchItemFilters = createAsyncThunk(
 const toItemFilters = (filters: ItemQueryParams): ItemFilters => ({
   purchased: filters.purchased,
   store: filters.store?.length ? filters.store[0] : undefined,
-  type: filters.type?.length ? filters.type[0] : undefined,
   sort: filters.sort,
 });
 

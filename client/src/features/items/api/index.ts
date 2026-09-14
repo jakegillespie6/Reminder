@@ -7,8 +7,9 @@ const buildQueryString = (params: ItemQueryParams): string => {
     const query = new URLSearchParams();
 
     if (params.store?.length) query.set('store', params.store.join(','));
-    if (params.type?.length) query.set('type', params.type.join(','));
-    if (params.purchased !== undefined) query.set('purchased', String(params.purchased));
+    if (params.purchased !== undefined) {
+        query.set('purchased', String(params.purchased));
+    }
     if (params.sort) query.set('sort', params.sort);
 
     return query.toString();

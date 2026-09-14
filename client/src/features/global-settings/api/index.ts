@@ -1,7 +1,7 @@
 import api from "@lib/api";
 import type {
   Theme,
-  CalendarView,
+  CalendarFilters,
   ItemFilters,
   GlobalSettingKey,
   GlobalSettingResponse,
@@ -23,8 +23,9 @@ export const globalSettingsApi = {
   getTheme: () => getSetting<Theme>("theme"),
   updateTheme: (value: Theme) => putSetting("theme", value),
 
-  getCalendar: () => getSetting<CalendarView>("calendar"),
-  updateCalendar: (value: CalendarView) => putSetting("calendar", value),
+  getCalendarFilters: () => getSetting<CalendarFilters | null>("calendar_filters"),
+  updateCalendarFilters: (value: CalendarFilters | null) =>
+    putSetting("calendar_filters", value),
 
   getItemFilters: () => getSetting<ItemFilters>("item_filters"),
   updateItemFilters: (value: ItemFilters) => putSetting("item_filters", value),

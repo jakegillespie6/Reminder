@@ -8,7 +8,6 @@ def _item_payload(item: Item) -> dict:
         "id": item.id,
         "name": item.name,
         "store": item.store,
-        "type": item.type,
         "purchased": item.purchased,
         "created_at": item.created_at.isoformat() if item.created_at else None,
     }
@@ -25,7 +24,7 @@ def create_item(data) -> Item:
     )
     return item
 
-ALLOWED_SORTS = {"created_at", "-created_at", "store", "type"}
+ALLOWED_SORTS = {"created_at", "-created_at", "store"}
 
 def _to_bool(value):
     if isinstance(value, bool):
@@ -56,7 +55,6 @@ def get_items(filters: dict):
     # Defensive normalization (even if caller bypasses serializer)
     purchased = _to_bool(filters.get("purchased", None))
     stores = _to_list(filters.get("store", None))
-    types = _to_list(filters.get("type", None))
     sort = filters.get("sort", None)
 
     if purchased is not None:
@@ -64,9 +62,6 @@ def get_items(filters: dict):
 
     if stores:
         queryset = queryset.filter(store__in=stores)
-
-    if types:
-        queryset = queryset.filter(type__in=types)
 
     if isinstance(sort, str) and sort in ALLOWED_SORTS:
         queryset = queryset.order_by(sort)

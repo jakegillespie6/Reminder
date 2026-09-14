@@ -1,26 +1,26 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { GlobalSettingsState } from "../types";
 import {
   fetchTheme,
   updateTheme,
-  fetchCalendar,
-  updateCalendar,
+  fetchCalendarFilters,
+  updateCalendarFilters,
   fetchItemFilters,
   updateItemFilters,
 } from "./thunks";
 
 const initialState: GlobalSettingsState = {
   theme: null,
-  calendar: null,
+  calendarFilters: null,
   itemFilters: {},
   updatedAt: {
     theme: null,
-    calendar: null,
+    calendarFilters: null,
     itemFilters: null,
   },
   status: {
     theme: "idle",
-    calendar: "idle",
+    calendarFilters: "idle",
     itemFilters: "idle",
   },
   error: null,
@@ -64,32 +64,32 @@ const globalSettingsSlice = createSlice({
         state.error = (action.payload as string) ?? action.error.message ?? "Failed to update theme";
       })
 
-      // Calendar
-      .addCase(fetchCalendar.pending, (state) => {
-        state.status.calendar = "loading";
+      // Calendar Filters
+      .addCase(fetchCalendarFilters.pending, (state) => {
+        state.status.calendarFilters = "loading";
         state.error = null;
       })
-      .addCase(fetchCalendar.fulfilled, (state, action) => {
-        state.status.calendar = "succeeded";
-        state.calendar = action.payload.value;
-        state.updatedAt.calendar = action.payload.updated_at;
+      .addCase(fetchCalendarFilters.fulfilled, (state, action) => {
+        state.status.calendarFilters = "succeeded";
+        state.calendarFilters = action.payload.value;
+        state.updatedAt.calendarFilters = action.payload.updated_at;
       })
-      .addCase(fetchCalendar.rejected, (state, action) => {
-        state.status.calendar = "failed";
-        state.error = (action.payload as string) ?? action.error.message ?? "Failed to fetch calendar";
+      .addCase(fetchCalendarFilters.rejected, (state, action) => {
+        state.status.calendarFilters = "failed";
+        state.error = (action.payload as string) ?? action.error.message ?? "Failed to fetch calendar filters";
       })
-      .addCase(updateCalendar.pending, (state) => {
-        state.status.calendar = "loading";
+      .addCase(updateCalendarFilters.pending, (state) => {
+        state.status.calendarFilters = "loading";
         state.error = null;
       })
-      .addCase(updateCalendar.fulfilled, (state, action) => {
-        state.status.calendar = "succeeded";
-        state.calendar = action.payload.value;
-        state.updatedAt.calendar = action.payload.updated_at;
+      .addCase(updateCalendarFilters.fulfilled, (state, action) => {
+        state.status.calendarFilters = "succeeded";
+        state.calendarFilters = action.payload.value;
+        state.updatedAt.calendarFilters = action.payload.updated_at;
       })
-      .addCase(updateCalendar.rejected, (state, action) => {
-        state.status.calendar = "failed";
-        state.error = (action.payload as string) ?? action.error.message ?? "Failed to update calendar";
+      .addCase(updateCalendarFilters.rejected, (state, action) => {
+        state.status.calendarFilters = "failed";
+        state.error = (action.payload as string) ?? action.error.message ?? "Failed to update calendar filters";
       })
 
       // Item filters

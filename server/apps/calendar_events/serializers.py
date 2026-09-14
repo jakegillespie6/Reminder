@@ -71,7 +71,14 @@ class CalendarEventSerializer(serializers.ModelSerializer):
         return obj.duration_seconds
 
     def get_is_multi_day(self, obj) -> bool:
-        return obj.is_multi_day
+        if not obj.start_date or not obj.end_date:
+            return False
+
+        event_timezone = ZoneInfo(obj.timezone)
+        start = obj.start_date.astimezone(event_timezone)
+        end = obj.end_date.astimezone(event_timezone)
+
+        return start.date() != end.date()
 
     def validate_timezone(self, value):
         try:
@@ -276,14 +283,9 @@ class CalendarEventSerializer(serializers.ModelSerializer):
             attrs["recurrence_months_of_year"] = []
             attrs["recurrence_set_positions"] = []
 
-        # All-day events use an exclusive end boundary.
-        #
-        # One-day event:
-        #
-        # start = Sep 11 00:00
-        # end   = Sep 12 00:00
-        #
-        # rather than 23:59:59.999999.
+        # All-day events use inclusive day boundaries:
+        # start = Sep 12 00:00:00
+        # end   = Sep 12 23:59:59
         if timing_type == CalendarEvent.TimingType.ALL_DAY:
             event_timezone = ZoneInfo(timezone_name)
 
@@ -293,60 +295,26 @@ class CalendarEventSerializer(serializers.ModelSerializer):
                 == CalendarEvent.TimingType.ALL_DAY
             )
 
-            normalize_start = (
-                "start_date" in attrs
-                or timing_type_changed
-            )
+            if ("start_date" in attrs or timing_type_changed) and start_date:
+                local_start = start_date.astimezone(event_timezone)
 
-            normalize_end = (
-                "end_date" in attrs
-                or timing_type_changed
-            )
-
-            if normalize_start and start_date:
-                local_start = start_date.astimezone(
-                    event_timezone
-                )
-
-                normalized_start = datetime(
+                attrs["start_date"] = datetime(
                     year=local_start.year,
                     month=local_start.month,
                     day=local_start.day,
                     tzinfo=event_timezone,
                 )
 
-                attrs["start_date"] = normalized_start
-                start_date = normalized_start
-
-            if normalize_end and end_date:
-                local_end = end_date.astimezone(
-                    event_timezone
-                )
-
-                local_start = start_date.astimezone(
-                    event_timezone
-                )
-
-                # If the provided end is already midnight on a later
-                # day, assume it is already an exclusive boundary.
-                if (
-                    local_end.time()
-                    == datetime.min.time()
-                    and local_end.date()
-                    > local_start.date()
-                ):
-                    end_day = local_end.date()
-
-                else:
-                    end_day = (
-                        local_end.date()
-                        + timedelta(days=1)
-                    )
+            if ("end_date" in attrs or timing_type_changed) and end_date:
+                local_end = end_date.astimezone(event_timezone)
 
                 attrs["end_date"] = datetime(
-                    year=end_day.year,
-                    month=end_day.month,
-                    day=end_day.day,
+                    year=local_end.year,
+                    month=local_end.month,
+                    day=local_end.day,
+                    hour=23,
+                    minute=59,
+                    second=59,
                     tzinfo=event_timezone,
                 )
 
