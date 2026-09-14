@@ -234,7 +234,7 @@ export function CalendarEventsScheduler({
   return (
     <Box
       sx={{
-        height: "85vh",
+        height: "100%",
         width: "100%",
         position: "relative",
         display: "flex",
