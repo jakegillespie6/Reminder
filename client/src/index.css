@@ -20,9 +20,9 @@
   --color-text-accent: 5 150 105;            /* emerald-600 */
 
   /* Accent */
-  --color-accent: 16 185 129;                /* emerald-500 */
-  --color-accent-hover: 5 150 105;           /* emerald-600 */
-  --color-accent-foreground: 255 255 255;    /* white */
+  --color-accent: 37 99 235;         /* blue-600 */
+  --color-accent-hover: 29 78 216;   /* blue-700 */
+  --color-accent-foreground: 255 255 255;
 
   /* Borders */
   --color-border: 226 232 240;               /* slate-200 */
@@ -54,9 +54,9 @@
   --color-text-accent: 52 211 153;            /* emerald-400 */
 
   /* Accent */
-  --color-accent: 16 185 129;                 /* emerald-500 */
-  --color-accent-hover: 52 211 153;           /* emerald-400 */
-  --color-accent-foreground: 2 6 23;          /* slate-950 */
+  --color-accent: 59 130 246;        /* blue-500 */
+  --color-accent-hover: 96 165 250;  /* blue-400 */
+  --color-accent-foreground: 255 255 255;
 
   /* Borders */
   --color-border: 51 65 85;                   /* slate-700 */
@@ -88,11 +88,9 @@
   --color-text-accent: 180 52 162;            /* #D600C1 */
 
   /* Accent */
-  --color-accent: 160 52 142;                 /* #A82A98 - muted magenta */
-  --color-accent-hover: 190 48 173;           /* #BE30AD - brighter hover */
+  --color-accent: 65 105 225;        /* royal blue */
+  --color-accent-hover: 100 149 237; /* cornflower blue */
   --color-accent-foreground: 255 255 255;
-  /* Accent text */
-
 
   /* Borders */
   --color-border: 48 55 82;                    /* subtle blue-slate */

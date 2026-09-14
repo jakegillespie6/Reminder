@@ -20,10 +20,13 @@ import FloatingActionButton from "@components/FloatingActionButton";
 interface CalendarEventsSchedulerProps {
   /** Renders the calendar without creation, editing, or context menus. */
   readOnly?: boolean;
+  /** Hides the scheduler toolbar and mini-calendar collapse control. */
+  hideControls?: boolean;
 }
 
 export function CalendarEventsScheduler({
   readOnly = false,
+  hideControls = false,
 }: CalendarEventsSchedulerProps) {
   const {
     events,
@@ -235,7 +238,9 @@ export function CalendarEventsScheduler({
     <Box
       sx={{
         height: "100%",
+        minHeight: 0,
         width: "100%",
+        overflow: "hidden",
         position: "relative",
         display: "flex",
         flexDirection: "column",
@@ -260,7 +265,39 @@ export function CalendarEventsScheduler({
         />
       )}
 
-      <EventCalendar
+    <EventCalendar
+      sx={{
+        flex: "1 1 0",
+        minHeight: 0,
+
+        "& [class*='MuiEventCalendar-headerToolbarLabel']": {
+          display: "none",
+        },
+
+        ...(hideControls && {
+          "& [class*='MuiEventCalendarHeader-root']": {
+            display: "none",
+          },
+          "& button[aria-expanded], & button[aria-label*='sidebar' i], & button[aria-label*='side panel' i]":
+            {
+              display: "none",
+            },
+          "& .MuiEventCalendar-headerToolbarTodayButton": {
+            display: "none",
+          },
+          // Hide previous / next navigation buttons
+          "& button[aria-label*='previous' i], & button[aria-label*='next' i]": {
+            display: "none",
+          },
+
+          // Hide Today button
+          "& button": {
+            "&:has(span)": {
+              // leave this out if unsupported in your browser
+            },
+          },
+        }),
+      }}
         view={view}
         onViewChange={handleViewChange}
         views={["day", "week", "month", "agenda"]}

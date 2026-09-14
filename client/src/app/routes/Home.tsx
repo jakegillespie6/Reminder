@@ -13,31 +13,31 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<HomeTab>("items");
 
   return (
-    <div className="relative min-h-full bg-background-primary px-1 pb-0 text-text-primary">
+    <div className="relative h-full overflow-hidden bg-background-primary px-1 text-text-primary">
       <Tabs
         value={activeTab}
         onChange={(_, newValue) => setActiveTab(newValue as HomeTab)}
-        className="space-y-2"
+        className="flex h-full min-h-0 flex-col gap-2"
       >
         <TabsList
           ariaLabel="Home navigation tabs"
-          className="sticky top-0 z-20 h-11 border-b border-border bg-background-primary"
+          className="sticky top-0 z-20 h-11 shrink-0 border-b border-border bg-background-primary"
         >
           <Tab value="items">Items</Tab>
           <Tab value="calendar">Calendar</Tab>
           <Tab value="global">Global Settings</Tab>
         </TabsList>
 
-        <div className="space-y-6">
-          <TabPanel value="items">
+        <div className="min-h-0 flex-1">
+          <TabPanel value="items" className="h-full overflow-y-auto">
             <ItemsManagerSection />
           </TabPanel>
 
-          <TabPanel value="calendar">
+          <TabPanel value="calendar" className="h-full overflow-hidden">
             <CalendarEventsScheduler />
           </TabPanel>
 
-          <TabPanel value="global">
+          <TabPanel value="global" className="h-full overflow-y-auto">
             <section className="space-y-4">
               <CollapsibleSection
                 title="Item Filters"

@@ -119,15 +119,63 @@ export function CalendarEventDialog({
           ).padStart(2, "0")}`,
         ].join("T");
 
+  const isBeforeDateOnly = (
+    value: Date | null,
+    minimum: Date | null
+  ): boolean => {
+    if (!value || !minimum) return false;
+
+    const valueDate = new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate()
+    );
+
+    const minimumDate = new Date(
+      minimum.getFullYear(),
+      minimum.getMonth(),
+      minimum.getDate()
+    );
+
+    return valueDate < minimumDate;
+  };
+
+  const handleAllDayStartDateChange = (value: Date | null) => {
+    const nextStartDate = toLocalDateString(value);
+
+    onChange.startDate(nextStartDate);
+    onChange.endDate(nextStartDate);
+  };
+
+  const handleAllDayEndDateChange = (value: Date | null) => {
+    const start = toDate(startDate);
+    const nextEndDate = isBeforeDateOnly(value, start)
+      ? start
+      : value;
+
+    onChange.endDate(toLocalDateString(nextEndDate));
+  };
+
   const handleAllDayChange = (allDay: boolean) => {
     onChange.timingType(allDay ? "all_day" : "exact");
 
-    const format = allDay
-      ? toLocalDateString
-      : toLocalDateTimeString;
+    if (allDay) {
+      const nextStart = toDate(startDate);
+      const nextEnd = toDate(endDate);
+      const nextStartDate = toLocalDateString(nextStart);
 
-    onChange.startDate(format(toDate(startDate)));
-    onChange.endDate(format(toDate(endDate)));
+      onChange.startDate(nextStartDate);
+      onChange.endDate(
+        isBeforeDateOnly(nextEnd, nextStart)
+          ? nextStartDate
+          : toLocalDateString(nextEnd)
+      );
+
+      return;
+    }
+
+    onChange.startDate(toLocalDateTimeString(toDate(startDate)));
+    onChange.endDate(toLocalDateTimeString(toDate(endDate)));
   };
 
   return (
@@ -178,9 +226,7 @@ export function CalendarEventDialog({
                 <DatePicker
                   label="Start date"
                   value={toDate(startDate)}
-                  onChange={(value) =>
-                    onChange.startDate(toLocalDateString(value))
-                  }
+                  onChange={handleAllDayStartDateChange}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -192,9 +238,8 @@ export function CalendarEventDialog({
                 <DatePicker
                   label="End date"
                   value={toDate(endDate)}
-                  onChange={(value) =>
-                    onChange.endDate(toLocalDateString(value))
-                  }
+                  minDate={toDate(startDate) ?? undefined}
+                  onChange={handleAllDayEndDateChange}
                   slotProps={{
                     textField: {
                       fullWidth: true,

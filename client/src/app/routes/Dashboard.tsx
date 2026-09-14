@@ -133,7 +133,7 @@ export default function Dashboard() {
 
 
         <div className="h-[50vh]">
-          <CalendarEventsScheduler readOnly />
+          <CalendarEventsScheduler readOnly hideControls />
         </div>
 
         <SortAndFilterList filters={filters} />
