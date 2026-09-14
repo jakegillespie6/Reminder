@@ -93,9 +93,6 @@ def _validate_item_filters(value: Any) -> dict[str, Any]:
     if "store" in value and value["store"] not in store_values:
         raise InvalidSettingValueError("Invalid 'store' value.")
 
-    type_values = {c.value for c in Item.ItemType}
-    if "type" in value and value["type"] not in type_values:
-        raise InvalidSettingValueError("Invalid 'type' value.")
 
     if "sort" in value:
         sort_value = value["sort"]

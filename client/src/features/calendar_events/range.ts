@@ -67,8 +67,15 @@ export const normalizeCalendarFilters = (value: unknown): CalendarFilters => {
     next.view = raw.view as CalendarView;
   }
 
-  if (typeof raw.anchor_date === "string" && raw.anchor_date.length >= 10) {
-    next.anchor_date = raw.anchor_date.slice(0, 10);
+  const anchorDate =
+    typeof raw.anchor_date === "string"
+      ? raw.anchor_date
+      : typeof raw.start_date === "string"
+        ? raw.start_date
+        : null;
+
+  if (anchorDate && anchorDate.length >= 10) {
+    next.anchor_date = anchorDate.slice(0, 10);
   }
 
   if (typeof raw.show_completed === "boolean") {

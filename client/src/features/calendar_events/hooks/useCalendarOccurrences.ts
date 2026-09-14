@@ -36,6 +36,12 @@ export function useCalendarOccurrences(visibleDate: Date) {
         end: occurrence.end_date,
         allDay: occurrence.timing_type === "all_day",
         readOnly: true,
+        
+      ...(occurrence.complete
+        ? {}
+        : {
+            color: "blue",
+          }),
       })),
     [occurrences],
   );

@@ -1,5 +1,4 @@
-import type { EventOccurrence, Weekday } from "../types";
-import type { TimingType } from "../types";
+import type { EventOccurrence, TimingType, Weekday } from "../types";
 export const WEEKDAYS: {
   value: Weekday;
   label: string;

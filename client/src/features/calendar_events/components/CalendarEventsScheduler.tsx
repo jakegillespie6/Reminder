@@ -1,5 +1,4 @@
-import { useCallback, useState } from "react";
-import { EventCalendar } from "@mui/x-scheduler/event-calendar";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, Box, CircularProgress } from "@mui/material";
 import { FiPlus } from "react-icons/fi";
 
@@ -16,6 +15,8 @@ import {
   toPayloadDate,
 } from "../utils/calendarEventUtils";
 import FloatingActionButton from "@components/FloatingActionButton";
+import { CalendarSchedulerView } from "./CalendarSchedulerView";
+import { CalendarTodaySummary } from "./CalendarTodaySummary";
 
 interface CalendarEventsSchedulerProps {
   /** Renders the calendar without creation, editing, or context menus. */
@@ -48,6 +49,15 @@ export function CalendarEventsScheduler({
   } = useCalendarGlobalSync();
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 30_000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const { occurrences, schedulerEvents, reload } =
     useCalendarOccurrences(visibleDate);
@@ -265,48 +275,22 @@ export function CalendarEventsScheduler({
         />
       )}
 
-    <EventCalendar
-      sx={{
-        flex: "1 1 0",
-        minHeight: 0,
-
-        "& [class*='MuiEventCalendar-headerToolbarLabel']": {
-          display: "none",
-        },
-
-        ...(hideControls && {
-          "& [class*='MuiEventCalendarHeader-root']": {
-            display: "none",
-          },
-          "& button[aria-expanded], & button[aria-label*='sidebar' i], & button[aria-label*='side panel' i]":
-            {
-              display: "none",
-            },
-          "& .MuiEventCalendar-headerToolbarTodayButton": {
-            display: "none",
-          },
-          // Hide previous / next navigation buttons
-          "& button[aria-label*='previous' i], & button[aria-label*='next' i]": {
-            display: "none",
-          },
-
-          // Hide Today button
-          "& button": {
-            "&:has(span)": {
-              // leave this out if unsupported in your browser
-            },
-          },
-        }),
-      }}
+      <CalendarSchedulerView
         view={view}
-        onViewChange={handleViewChange}
-        views={["day", "week", "month", "agenda"]}
-        events={schedulerEvents}
         visibleDate={visibleDate}
+        events={schedulerEvents}
+        hideControls={hideControls}
+        onViewChange={handleViewChange}
         onVisibleDateChange={handleVisibleDateChange}
         onEventEditingStart={handleEventEditingStart}
-        eventCreation={false}
       />
+
+      {readOnly && (
+        <CalendarTodaySummary
+          occurrences={occurrences}
+          now={now}
+        />
+      )}
 
       {!readOnly && (
         <>

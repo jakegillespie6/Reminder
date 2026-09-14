@@ -129,7 +129,7 @@ export default function Dashboard() {
         isCursorHidden ? "cursor-none" : ""
       }`}
     >
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto space-y-6">
 
 
         <div className="h-[50vh]">
