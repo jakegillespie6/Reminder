@@ -44,7 +44,7 @@ export default function SignIn() {
               localStorage.setItem("refresh_token", data.tokens.refresh);
               localStorage.setItem("account", JSON.stringify(data.account));
               toast.success("Signed in successfully");
-              navigate("/");
+              navigate("/dashboard");
             }
           } catch {
             // optional: show an error once
