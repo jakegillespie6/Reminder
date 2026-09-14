@@ -130,9 +130,7 @@ export default function Dashboard() {
       }`}
     >
       <div className="mx-auto max-w-4xl space-y-6">
-        <div className="flex justify-end">
-          <GuestPassQrCard />
-        </div>
+
 
         <CalendarEventsScheduler readOnly />
 
@@ -140,6 +138,9 @@ export default function Dashboard() {
 
         <div className="p-4">
           <ItemList refetchEpoch={refetchEpoch} />
+        </div>
+        <div className="flex justify-end">
+          <GuestPassQrCard />
         </div>
       </div>
     </div>
