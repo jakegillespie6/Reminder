@@ -3,7 +3,7 @@ import ThemeSettingsSection from "@features/global-settings/components/ThemeSett
 import CalendarSettingsSection from "@features/global-settings/components/CalendarSettingsSection";
 import ItemFiltersSettingsSection from "@features/global-settings/components/ItemFiltersSettingsSection";
 import ItemsManagerSection from "@features/items/components/ItemsManagerSection";
-import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventsScheduler";
+import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventScheduler";
 import { Tabs, TabsList, Tab, TabPanel } from "@components/Tabs";
 import CollapsibleSection from "@components/CollapsibleSection";
 

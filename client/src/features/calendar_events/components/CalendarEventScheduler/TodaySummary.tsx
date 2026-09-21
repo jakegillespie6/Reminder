@@ -1,12 +1,16 @@
 import { Box, Typography } from "@mui/material";
-import type { EventOccurrence } from "../types";
+
+import type { EventOccurrence } from "../../types";
 
 interface Props {
   occurrences: EventOccurrence[];
   now: number;
 }
 
-export function CalendarTodaySummary({ occurrences, now }: Props) {
+export function CalendarTodaySummary({
+  occurrences,
+  now,
+}: Props) {
   const nextOccurrence = occurrences
     .filter(
       (occurrence) =>
@@ -22,13 +26,9 @@ export function CalendarTodaySummary({ occurrences, now }: Props) {
   return (
     <Box
       sx={{
-        position: "absolute",
-        top: 325,
-        left: 0,
-        zIndex: 2,
-        width: 250,
+        width: "100%",
         boxSizing: "border-box",
-        p: 1.5,
+        p: 2,
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
@@ -49,27 +49,34 @@ export function CalendarTodaySummary({ occurrences, now }: Props) {
       </Typography>
 
       <Box sx={{ mt: 1 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block" }}
+        >
           Next upcoming
         </Typography>
 
         {nextOccurrence ? (
           <>
-            <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{ fontWeight: 600 }}
+            >
               {nextOccurrence.title || "Untitled"}
             </Typography>
 
             <Typography variant="caption" color="text.secondary">
               {nextOccurrence.timing_type === "all_day"
                 ? "All day"
-                : new Date(nextOccurrence.start_date).toLocaleString(
-                    undefined,
-                    {
-                      weekday: "short",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    },
-                  )}
+                : new Date(
+                    nextOccurrence.start_date,
+                  ).toLocaleString(undefined, {
+                    weekday: "short",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
             </Typography>
           </>
         ) : (

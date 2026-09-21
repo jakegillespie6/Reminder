@@ -10,18 +10,21 @@ import {
   FormControlLabel,
   InputLabel,
   MenuItem,
+  Popover,
   Radio,
   RadioGroup,
   Select,
   TextField,
+  Typography,
 } from "@mui/material";
 
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import {
   LocalizationProvider,
 } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { useState } from "react";
 
 import type {
   RecurrenceFreq,
@@ -140,22 +143,6 @@ export function CalendarEventDialog({
     return valueDate < minimumDate;
   };
 
-  const handleAllDayStartDateChange = (value: Date | null) => {
-    const nextStartDate = toLocalDateString(value);
-
-    onChange.startDate(nextStartDate);
-    onChange.endDate(nextStartDate);
-  };
-
-  const handleAllDayEndDateChange = (value: Date | null) => {
-    const start = toDate(startDate);
-    const nextEndDate = isBeforeDateOnly(value, start)
-      ? start
-      : value;
-
-    onChange.endDate(toLocalDateString(nextEndDate));
-  };
-
   const handleAllDayChange = (allDay: boolean) => {
     onChange.timingType(allDay ? "all_day" : "exact");
 
@@ -176,6 +163,39 @@ export function CalendarEventDialog({
 
     onChange.startDate(toLocalDateTimeString(toDate(startDate)));
     onChange.endDate(toLocalDateTimeString(toDate(endDate)));
+  };
+
+  const [rangeAnchor, setRangeAnchor] = useState<HTMLElement | null>(null);
+  const [pendingRangeStart, setPendingRangeStart] = useState<Date | null>(
+    null
+  );
+
+  const closeRangePicker = () => {
+    setRangeAnchor(null);
+    setPendingRangeStart(null);
+  };
+
+  const handleRangeDateChange = (value: Date | null) => {
+    if (!value) return;
+
+    if (!pendingRangeStart) {
+      setPendingRangeStart(value);
+      return;
+    }
+
+    const [start, end] =
+      value < pendingRangeStart
+        ? [value, pendingRangeStart]
+        : [pendingRangeStart, value];
+
+    onChange.startDate(toLocalDateString(start));
+    onChange.endDate(toLocalDateString(end));
+    closeRangePicker();
+  };
+
+  const formatDateDisplay = (value: string): string => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+    return match ? `${match[2]}/${match[3]}/${match[1]}` : "";
   };
 
   return (
@@ -223,30 +243,50 @@ export function CalendarEventDialog({
 
             {timingType === "all_day" ? (
               <>
-                <DatePicker
-                  label="Start date"
-                  value={toDate(startDate)}
-                  onChange={handleAllDayStartDateChange}
+                <TextField
+                  label="Date range"
+                  value={
+                    startDate && endDate
+                      ? `${formatDateDisplay(startDate)} - ${formatDateDisplay(
+                          endDate
+                        )}`
+                      : ""
+                  }
+                  fullWidth
+                  required
+                  onClick={(event) => {
+                    setPendingRangeStart(null);
+                    setRangeAnchor(event.currentTarget);
+                  }}
                   slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      required: true,
+                    htmlInput: {
+                      readOnly: true,
                     },
                   }}
                 />
 
-                <DatePicker
-                  label="End date"
-                  value={toDate(endDate)}
-                  minDate={toDate(startDate) ?? undefined}
-                  onChange={handleAllDayEndDateChange}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      required: true,
-                    },
+                <Popover
+                  open={Boolean(rangeAnchor)}
+                  anchorEl={rangeAnchor}
+                  onClose={closeRangePicker}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
                   }}
-                />
+                >
+                  <Box sx={{ p: 1 }}>
+                    <Typography sx={{ px: 2, pt: 1 }} variant="body2">
+                      {pendingRangeStart
+                        ? "Select the end date"
+                        : "Select the start date"}
+                    </Typography>
+
+                    <DateCalendar
+                      value={pendingRangeStart ?? toDate(startDate)}
+                      onChange={handleRangeDateChange}
+                    />
+                  </Box>
+                </Popover>
               </>
             ) : (
               <>
@@ -362,6 +402,30 @@ export function CalendarEventDialog({
                 </RadioGroup>
               </FormControl>
             )}
+
+        
+            <Popover
+              open={Boolean(rangeAnchor)}
+              anchorEl={rangeAnchor}
+              onClose={closeRangePicker}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <Box sx={{ p: 1 }}>
+                <Typography sx={{ px: 2, pt: 1 }} variant="body2">
+                  {pendingRangeStart
+                    ? "Select the end date"
+                    : "Select the start date"}
+                </Typography>
+
+                <DateCalendar
+                  value={pendingRangeStart ?? toDate(startDate)}
+                  onChange={handleRangeDateChange}
+                />
+              </Box>
+            </Popover>
           </Box>
         </LocalizationProvider>
       </DialogContent>

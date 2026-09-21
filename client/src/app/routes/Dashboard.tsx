@@ -14,9 +14,10 @@ import {
   fetchItemFilters,
 } from "@features/global-settings/store/thunks";
 import GuestPassQrCard from "@features/auth/components/GuestPassQrCard";
-import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventsScheduler";
+import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventScheduler";
 import { useCalendarEventsStore } from "@features/calendar_events/store";
 import { normalizeCalendarFilters } from "@features/calendar_events/range";
+import { CalendarDashboard } from "@features/calendar_events/components/CalendarDashboard";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
@@ -120,8 +121,6 @@ export default function Dashboard() {
     setRefetchEpoch((prev) => prev + 1);
   }, [filters]);
 
-  const calendarFilters = useCalendarEventsStore((s) => s.filters);
-  const calendarOccurrences = useCalendarEventsStore((s) => s.occurrences);
 
   return (
     <div
@@ -133,7 +132,7 @@ export default function Dashboard() {
 
 
         <div className="h-[50vh]">
-          <CalendarEventsScheduler readOnly hideControls />
+          <CalendarDashboard />
         </div>
 
         <SortAndFilterList filters={filters} />

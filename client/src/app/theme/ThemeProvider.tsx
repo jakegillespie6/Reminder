@@ -1,4 +1,15 @@
-import { createContext, useContext, useEffect, useMemo, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
+import {
+  CssBaseline,
+  ThemeProvider as MuiThemeProvider,
+  createTheme,
+} from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import { selectTheme } from "@features/global-settings/store/selectors";
 import { updateTheme } from "@features/global-settings/store/thunks";
@@ -17,9 +28,58 @@ const STORAGE_KEY = "app-theme";
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const themeFromState = useAppSelector(selectTheme);
-
-  // If fetch fails / state is empty, default to light
   const theme: Theme = themeFromState ?? "light";
+
+  const muiTheme = useMemo(() => {
+    const isDark = theme !== "light";
+
+    return createTheme({
+      palette: {
+        mode: isDark ? "dark" : "light",
+        background: {
+          default: "rgb(var(--color-background-primary))",
+          paper: "rgb(var(--color-surface))",
+        },
+        text: {
+          primary: "rgb(var(--color-text-primary))",
+          secondary: "rgb(var(--color-text-secondary))",
+        },
+        divider: "rgb(var(--color-border))",
+        primary: {
+          main: "rgb(var(--color-accent))",
+          contrastText: "rgb(var(--color-accent-foreground))",
+        },
+        success: {
+          main: "rgb(var(--color-success))",
+        },
+        warning: {
+          main: "rgb(var(--color-warning))",
+        },
+        error: {
+          main: "rgb(var(--color-danger))",
+        },
+        info: {
+          main: "rgb(var(--color-info))",
+        },
+      },
+      components: {
+        MuiPaper: {
+          styleOverrides: {
+            root: {
+              backgroundImage: "none",
+            },
+          },
+        },
+        MuiDialog: {
+          styleOverrides: {
+            paper: {
+              backgroundColor: "rgb(var(--color-surface))",
+            },
+          },
+        },
+      },
+    });
+  }, [theme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -30,16 +90,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     (nextTheme: Theme) => {
       void dispatch(updateTheme(nextTheme));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <MuiThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      <ThemeContext.Provider value={value}>
+        {children}
+      </ThemeContext.Provider>
+    </MuiThemeProvider>
+  );
 }
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+
+  if (!ctx) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
+
   return ctx;
 }
