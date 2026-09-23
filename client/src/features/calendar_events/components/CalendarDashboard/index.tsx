@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Box, CircularProgress, Paper } from "@mui/material";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -10,10 +9,8 @@ import { useCalendarOccurrences } from "../../hooks/useCalendarOccurrences";
 import { useCalendarGlobalSync } from "../../hooks/useCalendarGlobalSync";
 import { CalendarTodaySummary } from "../CalendarEventScheduler/TodaySummary";
 
-
 export function CalendarDashboard() {
-  const { events, isLoading, error, clearError } =
-    useCalendarEventsStore();
+  const { isLoading, error, clearError } = useCalendarEventsStore();
 
   const {
     view,
@@ -37,18 +34,14 @@ export function CalendarDashboard() {
   }, []);
 
   useEffect(() => {
-    if (view !== "day" && view !== "week") {
-      return;
-    }
+    if (view !== "day" && view !== "week") return;
 
     const timeoutIds: number[] = [];
     let animationFrameId: number | undefined;
 
     const centerCurrentTime = () => {
       const scheduler = schedulerRef.current;
-      if (!scheduler) {
-        return;
-      }
+      if (!scheduler) return;
 
       const indicators = scheduler.querySelectorAll<HTMLElement>(
         [
@@ -69,7 +62,8 @@ export function CalendarDashboard() {
             scrollContainer.scrollHeight > scrollContainer.clientHeight + 1;
 
           if (canScroll) {
-            const containerRect = scrollContainer.getBoundingClientRect();
+            const containerRect =
+              scrollContainer.getBoundingClientRect();
             const indicatorRect = indicator.getBoundingClientRect();
 
             const targetScrollTop =
@@ -100,8 +94,6 @@ export function CalendarDashboard() {
     };
 
     animationFrameId = window.requestAnimationFrame(centerCurrentTime);
-
-    // Retry while the scheduler finishes laying out its time grid.
     timeoutIds.push(window.setTimeout(centerCurrentTime, 100));
     timeoutIds.push(window.setTimeout(centerCurrentTime, 300));
 
@@ -130,55 +122,31 @@ export function CalendarDashboard() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden">
         {error && (
-          <Alert severity="error" onClose={clearError} sx={{ mb: 1 }}>
-            {error}
-          </Alert>
+          <div
+            role="alert"
+            className="mb-2 flex items-center justify-between rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            <span>{error}</span>
+
+            <button
+              type="button"
+              onClick={clearError}
+              className="ml-3 font-medium hover:underline"
+            >
+              Dismiss
+            </button>
+          </div>
         )}
 
         {isLoading && (
-          <CircularProgress
-            size={28}
-            sx={{
-              position: "absolute",
-              top: 16,
-              right: 16,
-              zIndex: 10,
-            }}
-          />
+          <div className="absolute right-4 top-4 z-10 h-7 w-7 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
         )}
 
-        <Box
-          sx={{
-            display: "flex",
-            flex: "1 1 0",
-            gap: 1.5,
-            minWidth: 0,
-            minHeight: 0,
-          }}
-        >
-          <Box
-            sx={{
-              width: 312,
-              flexShrink: 0,
-              display: { xs: "none", md: "flex" },
-              flexDirection: "column",
-              gap: 2,
-              overflowY: "auto",
-            }}
-          >
-            <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+        <div className="flex min-h-0 min-w-0 flex-1 gap-3">
+          <aside className="hidden w-[312px] shrink-0 flex-col gap-4 overflow-y-auto md:flex">
+            <div className="overflow-hidden rounded-lg border border-border bg-surface">
               <DateCalendar
                 value={visibleDate}
                 onChange={(date) => {
@@ -187,49 +155,66 @@ export function CalendarDashboard() {
                   }
                 }}
               />
-            </Paper>
+            </div>
 
             <CalendarTodaySummary
               occurrences={occurrences}
               now={now}
             />
-          </Box>
+          </aside>
 
-          <Box
+          <div
             ref={schedulerRef}
-            sx={{ flex: "1 1 0", minWidth: 0, minHeight: 0 }}
+            className="min-h-0 min-w-0 flex-1"
           >
-            <EventCalendar
-              sx={{
-                width: "100%",
-                height: "100%",
-                minWidth: 0,
-                minHeight: 0,
-                "& [class*='MuiEventCalendarHeader-root']": {
-                  display: "none",
-                },
-                "& [class*='MuiEventCalendar-headerToolbar']": {
-                  display: "none",
-                },
-                "& [class*='MuiEventCalendar-sidePanel']": {
-                  display: "none",
-                },
-                "& [class*='MuiEventCalendarSidePanel']": {
-                  display: "none",
-                },
-              }}
-              view={view}
-              views={["day", "week", "month", "agenda"]}
-              events={schedulerEvents}
-              visibleDate={visibleDate}
-              onViewChange={handleViewChange}
-              onVisibleDateChange={handleVisibleDateChange}
-              onEventEditingStart={handleEventEditingStart}
-              eventCreation={false}
-            />
-          </Box>
-        </Box>
-      </Box>
+<EventCalendar
+  sx={{
+    width: "100%",
+    height: "100%",
+    minWidth: 0,
+    minHeight: 0,
+
+    "& [class*='MuiEventCalendarHeader-root']": {
+      display: "none",
+    },
+    "& [class*='MuiEventCalendar-headerToolbar']": {
+      display: "none",
+    },
+    "& [class*='MuiEventCalendar-sidePanel']": {
+      display: "none",
+    },
+    "& [class*='MuiEventCalendarSidePanel']": {
+      display: "none",
+    },
+
+    // Event name first, time second
+    "& .MuiEventCalendar-eventItemTitle": {
+      order: 1,
+    },
+    "& .MuiEventCalendar-eventItemTime": {
+      order: 2,
+    },
+
+    // Day/week time-grid events
+    "& .MuiEventCalendar-timeGridEventTitle": {
+      order: 1,
+    },
+    "& .MuiEventCalendar-timeGridEventTime": {
+      order: 2,
+    },
+  }}
+  view={view}
+  views={["day", "week", "month", "agenda"]}
+  events={schedulerEvents}
+  visibleDate={visibleDate}
+  onViewChange={handleViewChange}
+  onVisibleDateChange={handleVisibleDateChange}
+  onEventEditingStart={handleEventEditingStart}
+  eventCreation={false}
+/>
+          </div>
+        </div>
+      </div>
     </LocalizationProvider>
   );
 }

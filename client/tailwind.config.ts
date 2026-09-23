@@ -15,7 +15,7 @@ export default {
           "rgb(var(--color-background-tertiary) / <alpha-value>)",
 
         /* Surfaces */
-        surface:
+        "surface":
           "rgb(var(--color-surface) / <alpha-value>)",
         "surface-elevated":
           "rgb(var(--color-surface-elevated) / <alpha-value>)",
@@ -31,7 +31,7 @@ export default {
           "rgb(var(--color-text-accent) / <alpha-value>)",
 
         /* Accent */
-        accent:
+        "accent":
           "rgb(var(--color-accent) / <alpha-value>)",
         "accent-hover":
           "rgb(var(--color-accent-hover) / <alpha-value>)",
@@ -39,7 +39,7 @@ export default {
           "rgb(var(--color-accent-foreground) / <alpha-value>)",
 
         /* Borders */
-        border:
+        "border":
           "rgb(var(--color-border) / <alpha-value>)",
         "border-strong":
           "rgb(var(--color-border-strong) / <alpha-value>)",

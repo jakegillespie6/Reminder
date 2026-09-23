@@ -1,6 +1,7 @@
 import Dropdown from "@components/Dropdown";
 import ToggleButtonGroup from "@components/ToggleButtonGroup";
 import {
+  STORE_LABELS,
   STORE_OPTIONS,
   SORT_OPTIONS,
   type SortOption,
@@ -30,7 +31,7 @@ const STORE_FILTER_OPTIONS: ReadonlyArray<{
   { value: "all", label: "Store: all" },
   ...STORE_OPTIONS.map((store) => ({
     value: store,
-    label: store === "general" ? "General" : store,
+    label: STORE_LABELS[store],
   })),
 ];
 

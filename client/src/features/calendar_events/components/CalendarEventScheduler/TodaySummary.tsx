@@ -24,50 +24,31 @@ export function CalendarTodaySummary({
     )[0];
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        boxSizing: "border-box",
-        p: 2,
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 2,
-        bgcolor: "background.paper",
-        boxShadow: 1,
-      }}
-    >
-      <Typography variant="overline" color="text.secondary">
+    <div className="box-border w-full shrink-0 rounded-lg border border-border bg-surface p-4 shadow-lg">
+      <p className="text-xs font-medium uppercase tracking-wider text-text-secondary">
         Today
-      </Typography>
+      </p>
 
-      <Typography variant="h6">
+      <h2 className="text-xl font-semibold">
         {new Date(now).toLocaleDateString(undefined, {
           weekday: "short",
           month: "long",
           day: "numeric",
         })}
-      </Typography>
+      </h2>
 
-      <Box sx={{ mt: 1 }}>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: "block" }}
-        >
+      <div className="mt-2">
+        <p className="block text-xs text-text-secondary">
           Next upcoming
-        </Typography>
+        </p>
 
         {nextOccurrence ? (
           <>
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{ fontWeight: 600 }}
-            >
+            <p className="truncate text-sm font-semibold">
               {nextOccurrence.title || "Untitled"}
-            </Typography>
+            </p>
 
-            <Typography variant="caption" color="text.secondary">
+            <p className="text-xs text-text-secondary">
               {nextOccurrence.timing_type === "all_day"
                 ? "All day"
                 : new Date(
@@ -77,14 +58,14 @@ export function CalendarTodaySummary({
                     hour: "numeric",
                     minute: "2-digit",
                   })}
-            </Typography>
+            </p>
           </>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-text-secondary">
             No upcoming events
-          </Typography>
+          </p>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

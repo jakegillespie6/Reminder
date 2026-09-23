@@ -46,6 +46,7 @@ class Item(models.Model):
         STATER_BROS = 'stater_bros', 'Stater Bros'
         HMART = 'hmart', 'H-Mart'
         RANCH_99 = '99_ranch', '99 Ranch'
+        COSTCO = 'costco', 'Costco'
         GENERAL = 'general', 'General'
 
     name = models.CharField(max_length=64)

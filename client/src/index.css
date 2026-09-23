@@ -25,7 +25,7 @@
   --color-accent-foreground: 255 255 255;
 
   /* Borders */
-  --color-border: 226 232 240;               /* slate-200 */
+  --color-border: 206 202 210;               /* slate-200 */
   --color-border-strong: 148 163 184;        /* slate-400 */
 
   /* Status */
@@ -39,13 +39,13 @@
 /* dark */
 [data-theme="dark"] {
   /* Background hierarchy */
-  --color-background-primary: 2 6 23;        /* slate-950 */
-  --color-background-secondary: 15 23 42;    /* slate-900 */
-  --color-background-tertiary: 30 41 59;     /* slate-800 */
+  --color-background-primary: 16 16 16;        /* slate-950 */
+  --color-background-secondary: 26 26 26;    /* slate-900 */
+  --color-background-tertiary: 35 41 35;     /* slate-800 */
 
   /* Surfaces */
-  --color-surface: 20 30 48;                 /* between slate-900 / slate-800 */
-  --color-surface-elevated: 30 41 59;        /* slate-800 */
+  --color-surface: 31 31 35;                 /* between slate-900 / slate-800 */
+  --color-surface-elevated: 35 35 40;        /* slate-800 */
 
   /* Text hierarchy */
   --color-text-primary: 241 245 249;          /* slate-100 */
@@ -59,7 +59,7 @@
   --color-accent-foreground: 255 255 255;
 
   /* Borders */
-  --color-border: 51 65 85;                   /* slate-700 */
+  --color-border: 51 65 70;                   /* slate-700 */
   --color-border-strong: 71 85 105;           /* slate-600 */
 
   /* Status */
@@ -112,4 +112,28 @@ body,
   height: 100%;
   background-color: rgb(var(--color-background-primary));
   color: rgb(var(--color-text-primary));
+}
+
+/* Custom thin, rounded, slightly transparent scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-border-strong) / 0.55) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(var(--color-border-strong) / 0.55);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--color-border-strong) / 0.8);
 }

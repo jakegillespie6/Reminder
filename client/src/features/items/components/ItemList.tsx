@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppSelector } from "@store/hooks";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
   selectAllItems,
   selectItemsError,
   selectItemsLoading,
+  selectFilters,
 } from "../store";
 import ItemPill from "./ItemPill";
-import type { Item } from "../types";
+import {
+  STORE_LABELS,
+  type Item,
+  type Store,
+} from "../types";
 
 const PLACEHOLDER_COUNT = 8;
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -67,6 +72,7 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
   const items = useAppSelector(selectAllItems);
   const loading = useAppSelector(selectItemsLoading);
   const error = useAppSelector(selectItemsError);
+  const filters = useAppSelector(selectFilters);
 
   const [highlightedIds, setHighlightedIds] = useState<ItemId[]>([]);
   const prevItemSignatureRef = useRef<Map<ItemId, string>>(new Map());
@@ -129,6 +135,23 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
     };
   }, []);
 
+  const groupedItems = useMemo(() => {
+    const groups = new Map<Store, Item[]>();
+
+    for (const item of items) {
+      const group = groups.get(item.store) ?? [];
+      group.push(item);
+      groups.set(item.store, group);
+    }
+
+    return Array.from(groups.entries()).map(([store, groupItems]) => ({
+      store,
+      items: groupItems,
+    }));
+  }, [items]);
+
+  const isGroupedByStore = filters.sort === "store";
+
   if (error) return <p className="text-base text-danger">{error}</p>;
 
   if (loading && !items.length) {
@@ -144,14 +167,16 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
           <motion.span
             key={`item-skeleton-${index}`}
             variants={skeletonVariants}
-            className="inline-block h-8 w-24 rounded-full bg-gray-200 dark:bg-gray-700"
+            className="inline-block h-8 w-24 rounded-full bg-surface"
           />
         ))}
       </motion.div>
     );
   }
 
-  if (!items.length) return <p className="text-base text-text-tertiary">No items yet.</p>;
+  if (!items.length) {
+    return <p className="text-base text-text-tertiary">No items yet.</p>;
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -163,22 +188,55 @@ export default function ItemList({ refetchEpoch = 0 }: Props) {
         exit="exit"
         className="flex flex-wrap gap-2"
       >
-        <motion.div className="flex flex-wrap gap-2">
+        <motion.div className="flex flex-wrap items-start gap-3">
           <AnimatePresence>
-            {items.map((item, index) => (
-              <motion.div
-                key={item.id}
-                custom={index}
-                initial="hidden"
-                animate="show"
-                layout
-                variants={itemVariants}
-                exit="exit"
-                transition={{ layout: { duration: 0.22, ease: EASE_OUT } }}
-              >
-                <ItemPill item={item} highlight={highlightedIds.includes(item.id)} />
-              </motion.div>
-            ))}
+            {isGroupedByStore
+              ? groupedItems.map((group) => (
+                  <motion.fieldset
+                    key={group.store}
+                    layout
+                    className="min-w-0 max-w-full flex-none rounded-lg border border-border px-3 pb-3 pt-2"
+                  >
+                    <legend className="px-1 text-xs font-semibold text-text-secondary">
+                      {STORE_LABELS[group.store]}
+                    </legend>
+
+                    <div className="flex max-w-full flex-wrap gap-2">
+                      {group.items.map((item, index) => (
+                        <motion.div
+                          key={item.id}
+                          custom={index}
+                          initial="hidden"
+                          animate="show"
+                          layout
+                          variants={itemVariants}
+                          exit="exit"
+                        >
+                          <ItemPill
+                            item={item}
+                            highlight={highlightedIds.includes(item.id)}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.fieldset>
+                ))
+              : items.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    custom={index}
+                    initial="hidden"
+                    animate="show"
+                    layout
+                    variants={itemVariants}
+                    exit="exit"
+                  >
+                    <ItemPill
+                      item={item}
+                      highlight={highlightedIds.includes(item.id)}
+                    />
+                  </motion.div>
+                ))}
           </AnimatePresence>
         </motion.div>
       </motion.div>

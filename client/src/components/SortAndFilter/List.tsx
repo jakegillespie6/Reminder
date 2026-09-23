@@ -78,15 +78,11 @@ export default function SortAndFilterList({
   return (
     <div
       className={`
-        rounded-lg border border-border bg-background-secondary p-4 shadow-sm
-        transition-colors hover:bg-surface-elevated
         ${className}
       `}
     >
       <div className="flex flex-wrap items-start gap-2">
-        <span className="inline-flex h-7 items-center whitespace-nowrap text-xs font-medium text-text-secondary">
-          Active filters:
-        </span>
+
 
         {!hasAny ? (
           <p className="text-base text-text-tertiary">{emptyText}</p>

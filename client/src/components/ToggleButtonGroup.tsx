@@ -33,7 +33,8 @@ export default function ToggleButtonGroup<T extends string>({
         role="tablist"
         aria-label={label ?? "Toggle options"}
         className={cn(
-          "flex w-full overflow-hidden rounded-md border border-border bg-background-tertiary divide-x divide-background-primary",
+          "grid w-full overflow-hidden rounded-md border border-border",
+          "grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))] gap-px",
           className
         )}
       >
@@ -49,11 +50,11 @@ export default function ToggleButtonGroup<T extends string>({
               onClick={() => onChange(option.value)}
               disabled={disabled}
               className={cn(
-                "flex-1 px-3 py-1.5 text-center text-base font-medium transition-colors",
+                "min-w-0 px-3 py-1.5 text-center text-base font-medium transition-colors",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 isActive
                   ? "bg-accent text-white"
-                  : "text-text-primary hover:bg-surface-elevated"
+                  : "bg-background-tertiary text-text-primary hover:bg-surface-elevated"
               )}
             >
               {option.label}

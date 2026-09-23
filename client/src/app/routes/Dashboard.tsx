@@ -14,10 +14,12 @@ import {
   fetchItemFilters,
 } from "@features/global-settings/store/thunks";
 import GuestPassQrCard from "@features/auth/components/GuestPassQrCard";
-import { CalendarEventsScheduler } from "@features/calendar_events/components/CalendarEventScheduler";
+import { Divider } from "@mui/material";
 import { useCalendarEventsStore } from "@features/calendar_events/store";
 import { normalizeCalendarFilters } from "@features/calendar_events/range";
 import { CalendarDashboard } from "@features/calendar_events/components/CalendarDashboard";
+import LabeledPanel from "@components/LabeledPanel";
+import WeatherForecast from "@features/weather";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
@@ -121,7 +123,6 @@ export default function Dashboard() {
     setRefetchEpoch((prev) => prev + 1);
   }, [filters]);
 
-
   return (
     <div
       className={`box-border min-h-full overflow-x-hidden bg-background-primary p-6 text-text-primary ${
@@ -130,16 +131,26 @@ export default function Dashboard() {
     >
       <div className="mx-auto space-y-6">
 
-
-        <div className="h-[50vh]">
+        <div className="h-[30vh]">
           <CalendarDashboard />
         </div>
 
-        <SortAndFilterList filters={filters} />
+        
+        <div className="grid h-[30vh] w-full grid-cols-5 gap-6">
+            <LabeledPanel
+              label="Shopping List"
+              className="col-span-3 min-w-0 rounded-lg border border-border bg-surface"
+            >
+              <SortAndFilterList filters={filters} />
+              <Divider />
+              <ItemList refetchEpoch={refetchEpoch} />
+            </LabeledPanel>
 
-        <div className="p-4">
-          <ItemList refetchEpoch={refetchEpoch} />
+          <div className="col-span-2 min-w-0 overflow-y-auto rounded-lg border border-border bg-surface">
+            <WeatherForecast />
+          </div>
         </div>
+
         <div className="flex justify-end">
           <GuestPassQrCard />
         </div>

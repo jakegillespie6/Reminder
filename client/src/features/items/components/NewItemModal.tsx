@@ -3,10 +3,10 @@ import toast from "react-hot-toast";
 import Button from "@components/Button";
 import Modal from "@components/Modal";
 import Input from "@components/Input";
-import Dropdown, { type DropdownOption } from "@components/Dropdown";
+import ToggleButtonGroup from "@components/ToggleButtonGroup";
 import { useAppDispatch } from "@store/hooks";
 import { createItem } from "../store";
-import { STORE_OPTIONS, type Store } from "../types";
+import { STORE_LABELS, STORE_OPTIONS, type Store } from "../types";
 
 type NewItemModalProps = {
   isOpen: boolean;
@@ -21,14 +21,14 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
   const [newItemStore, setNewItemStore] = useState<Store>("general");
 
 
-  const storeOptions: ReadonlyArray<DropdownOption<Store>> = STORE_OPTIONS.map((store) => ({
+  const storeOptions = STORE_OPTIONS.map((store) => ({
     value: store,
-    label: store === "general" ? "General" : store,
+    label: STORE_LABELS[store],
   }));
 
   const resetCreateForm = () => {
     setNewItemName("");
-    setNewItemStore("general");
+    // Preserve the previously selected store.
   };
 
   const handleClose = () => {
@@ -85,7 +85,7 @@ export default function NewItemModal({ isOpen, onClose, onCreated }: NewItemModa
           className="text-base md:text-base"
         />
 
-        <Dropdown<Store>
+        <ToggleButtonGroup<Store>
           label="Store"
           value={newItemStore}
           onChange={setNewItemStore}
